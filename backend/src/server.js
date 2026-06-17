@@ -1,39 +1,31 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const connectDB = require("./config/db");
-const cors = require("cors");
-const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
+const connectDB = require ("./config/db.js");
+const app = require("./app.js");
+const dotenv = require("dotenv");
 
-const app = express();
-connectDB();
-
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.text({ type: 'text/*' }));
-
-// Log incoming requests for debugging
-app.use((req, res, next) => {
-  console.log('>>>', req.method, req.url, 'Content-Type:', req.headers['content-type']);
-  next();
+dotenv.config({
+    path: "./.env"
 });
 
 
-mongoose.connect(MONGODB_URI)
-.then(() => console.log("MongoDB Connected"))
-.catch(err => console.error('MongoDB connection error:', err));
 
+const PORT = process.env.PORT 
+const MONGODB_URI = process.env.MONGODB_URI 
 
-//Test 
-app.get("/", (req, res) => {
-    res.send("API is running");
-});
+const RunServer = async () => {
+  try {
+    await connectDB(MONGODB_URI);
+    console.log("MongoDB Connected");
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    }
+    );
+    } catch (err) {
+        console.error('MongoDB connection error:', err);
+    }
+}
 
-// Sensor Routes
-app.use("/api/sensor", require("./routes/SensorRoutes"));
-
-
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
+RunServer().then(() => {
+    console.log("Server started successfully");
+}).catch(err => {
+    console.error("Error starting server:", err);
 });
