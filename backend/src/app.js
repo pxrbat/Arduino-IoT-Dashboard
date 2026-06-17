@@ -1,12 +1,34 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const connectDB = require("./config/db");
 const cors = require("cors");
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
+const { Server } = require("socket.io");
+const { createServer } = require('node:http');
 
 const app = express();
-connectDB();
+
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log('A client connected:', socket.id);
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.id);
+  });
+});
+
+io.on('error', (err) => {
+  console.error('Socket.IO error:', err);
+});
+
+
 
 app.use(cors(
   {origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
@@ -27,6 +49,7 @@ app.use(express.text({ type: 'text/*' }));
 app.use("/api/sensor", require("./routes/SensorRoutes"));
 
 
-module.exports = app;
+
+module.exports = { app, io, httpServer };
 
 

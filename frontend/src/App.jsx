@@ -6,6 +6,7 @@ import EnvironmentalChart from './components/EnvironmentalChart';
 import DataTable from './components/DataTable';
 import AdminControls from './components/AdminControls'; // Import Admin Block
 import './App.css';
+import socketIOClient from 'socket.io-client';
 
 const API_END_POINT = 'http://localhost:5000/api/sensor/data';
 
@@ -33,6 +34,15 @@ export default function App() {
       });
     }
   };
+  const socket = socketIOClient('http://localhost:5000');
+  socket.on('connect', () => {
+    console.log('Connected to Socket.IO server');
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Disconnected from Socket.IO server');
+  });
+
 
   useEffect(() => {
     fetchSensorLogs();
