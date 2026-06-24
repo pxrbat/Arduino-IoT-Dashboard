@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Radio, Thermometer, Droplets } from 'lucide-react';
-import './LiveFeed.css';
+import './Livefeed.css';
 
 function formatTime(iso) {
   try {
