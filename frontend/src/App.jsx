@@ -1,24 +1,65 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
-import { Thermometer, Droplets, RefreshCw, Layers, ShieldCheck, User } from 'lucide-react';
+import {
+  Droplets,
+  Layers,
+  LogOut,
+  RefreshCw,
+  ShieldCheck,
+  Thermometer,
+  User,
+  Wifi,
+  WifiOff,
+} from 'lucide-react';
 import DashboardCard from './components/DashboardCard';
 import EnvironmentalChart from './components/EnvironmentalChart';
 import DataTable from './components/DataTable';
 import AdminControls from './components/AdminControls';
 import LiveFeed from './components/Livefeed';
+import LoginPage from './components/LoginPage';
 import './App.css';
 import socketIOClient from 'socket.io-client';
 
 const API_END_POINT = 'http://localhost:5000/api/sensor/data';
 const SOCKET_URL = 'http://localhost:5000';
+const SESSION_STORAGE_KEY = 'iot-dashboard-session';
+
+const DEMO_USERS = {
+  'admin@iot.local': {
+    password: 'admin123',
+    name: 'System Admin',
+    role: 'admin',
+  },
+  'user@iot.local': {
+    password: 'user123',
+    name: 'Guest Operator',
+    role: 'user',
+  },
+};
 
 export default function App() {
+  const [session, setSession] = useState(null);
+  const [loginError, setLoginError] = useState('');
   const [dataLogs, setDataLogs] = useState([]);
   const [errorSyncing, setErrorSyncing] = useState(false);
   const [isLive, setIsLive] = useState(false);
 
-  // Role State: 'user' or 'admin'
-  const [currentRole, setCurrentRole] = useState('user');
+  useEffect(() => {
+    const savedSession = window.localStorage.getItem(SESSION_STORAGE_KEY);
+
+    if (!savedSession) {
+      return;
+    }
+
+    try {
+      const parsedSession = JSON.parse(savedSession);
+      if (parsedSession?.email && parsedSession?.role) {
+        setSession(parsedSession);
+      }
+    } catch {
+      window.localStorage.removeItem(SESSION_STORAGE_KEY);
+    }
+  }, []);
 
   const fetchSensorLogs = useCallback(async () => {
     try {
@@ -38,9 +79,14 @@ export default function App() {
     }
   }, []);
 
-  // Socket lifecycle: connect once on mount, always clean up on unmount.
-  // Previously this ran on every render body, opening a fresh connection each time.
   useEffect(() => {
+    if (!session) {
+      setIsLive(false);
+      setDataLogs([]);
+      setErrorSyncing(false);
+      return undefined;
+    }
+
     const socket = socketIOClient(SOCKET_URL);
 
     socket.on('connect', () => {
@@ -72,56 +118,94 @@ export default function App() {
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [session]);
 
   useEffect(() => {
+    if (!session) {
+      return undefined;
+    }
+
     fetchSensorLogs();
     const runtimeInterval = setInterval(fetchSensorLogs, 3000);
     return () => clearInterval(runtimeInterval);
-  }, [fetchSensorLogs]);
+  }, [fetchSensorLogs, session]);
+
+  const handleLogin = (email, password) => {
+    const normalizedEmail = email.trim().toLowerCase();
+    const account = DEMO_USERS[normalizedEmail];
+
+    if (!account || account.password !== password) {
+      setLoginError('Invalid credentials. Try admin@iot.local / admin123 or user@iot.local / user123.');
+      return false;
+    }
+
+    const nextSession = {
+      email: normalizedEmail,
+      name: account.name,
+      role: account.role,
+    };
+
+    setSession(nextSession);
+    setLoginError('');
+    window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(nextSession));
+    return true;
+  };
+
+  const handleLogout = () => {
+    window.localStorage.removeItem(SESSION_STORAGE_KEY);
+    setSession(null);
+    setDataLogs([]);
+    setLoginError('');
+  };
 
   const newestLog = dataLogs[0] || { temperature: 0, humidity: 0 };
 
+  if (!session) {
+    return <LoginPage onLogin={handleLogin} error={loginError} />;
+  }
+
   return (
-    <div>
-      {/* Top Selector Banner mimicking Login Switch */}
-      <div className="role-banner">
-        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-          {currentRole === 'admin' ? <ShieldCheck size={16} color="#ea580c" /> : <User size={16} color="#ffffff" />}
-          View Access Mode: <strong>{currentRole.toUpperCase()}</strong>
-        </span>
-        <div>
-          <label style={{ marginRight: '0.5rem' }}>Switch Account: </label>
-          <select
-            className="role-select"
-            value={currentRole}
-            onChange={(e) => setCurrentRole(e.target.value)}
-          >
-            <option value="user">General Guest / User</option>
-            <option value="admin">System Administrator</option>
-          </select>
-        </div>
-      </div>
+    <div className="app-shell">
+      <div className="app-shell-glow app-shell-glow-a" />
+      <div className="app-shell-glow app-shell-glow-b" />
 
       <header className="header">
         <div className="header-title-container">
-          <Layers size={22} color="#34d399" />
-          <h2 style={{ margin: 0, fontSize: '1.25rem' }}>IoT Environmental Monitor Panel</h2>
+          <Layers size={22} />
+          <div>
+            <h1 className="dashboard-title">IoT Environmental Monitor Panel</h1>
+            <p className="dashboard-subtitle">Signed in as {session.name}</p>
+          </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+
+        <div className="header-actions">
+          <span className={`connection-pill ${isLive ? 'is-live' : 'is-offline'}`}>
+            {isLive ? <Wifi size={14} /> : <WifiOff size={14} />}
+            {isLive ? 'Live socket' : 'Offline cache'}
+          </span>
           {errorSyncing && <span className="error-message">Connection lost — showing simulated data</span>}
           <button className="sync-button" onClick={fetchSensorLogs}>
             <RefreshCw size={16} /> Refresh
+          </button>
+          <button className="logout-button" onClick={handleLogout}>
+            <LogOut size={16} /> Logout
           </button>
         </div>
       </header>
 
       <main className="dashboard-container">
+        <section className="account-strip">
+          <div>
+            <p className="account-label">Session</p>
+            <h2 className="account-name">{session.name}</h2>
+          </div>
+          <div className="account-meta">
+            {session.role === 'admin' ? <ShieldCheck size={16} /> : <User size={16} />}
+            <span>{session.role === 'admin' ? 'Administrator access' : 'User access'}</span>
+          </div>
+        </section>
 
-        {/* CONDITIONAL RENDERING: Render administrative configuration options ONLY if role matches 'admin' */}
-        {currentRole === 'admin' && (
-          <AdminControls onRefresh={fetchSensorLogs} />
-        )}
+        {session.role === 'admin' && <AdminControls onRefresh={fetchSensorLogs} />}
 
         <div className="cards-grid">
           <DashboardCard
