@@ -26,14 +26,14 @@ export default function AdminControls({ onRefresh }) {
       <p style={{ fontSize: '0.875rem', color: '#7c2d12', margin: '0 0 1rem 0' }}>
         Authorized Actions: Override hardware parameters, system thresholds, or clear persistent log sheets.
       </p>
-      
+
       <div className="admin-grid">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Temperature Limit Sensor Warning (°C)</label>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <input 
-              type="number" 
-              value={alertThreshold} 
+            <input
+              type="number"
+              value={alertThreshold}
               onChange={(e) => setAlertThreshold(e.target.value)}
               style={{ padding: '0.5rem', width: '80px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
             />

@@ -1,16 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
-import {
-  Droplets,
-  Layers,
-  LogOut,
-  RefreshCw,
-  ShieldCheck,
-  Thermometer,
-  User,
-  Wifi,
-  WifiOff,
-} from 'lucide-react';
 import DashboardCard from './components/DashboardCard';
 import EnvironmentalChart from './components/EnvironmentalChart';
 import DataTable from './components/DataTable';
@@ -43,6 +32,7 @@ export default function App() {
   const [dataLogs, setDataLogs] = useState([]);
   const [errorSyncing, setErrorSyncing] = useState(false);
   const [isLive, setIsLive] = useState(false);
+  const [theme, setTheme] = useState('dark');
 
   useEffect(() => {
     const savedSession = window.localStorage.getItem(SESSION_STORAGE_KEY);
@@ -60,6 +50,20 @@ export default function App() {
       window.localStorage.removeItem(SESSION_STORAGE_KEY);
     }
   }, []);
+
+  useEffect(() => {
+    const savedTheme = window.localStorage.getItem('iot-dashboard-theme');
+    const preferredTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    setTheme(preferredTheme);
+    document.documentElement.setAttribute('data-theme', preferredTheme);
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    window.localStorage.setItem('iot-dashboard-theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+  };
 
   const fetchSensorLogs = useCallback(async () => {
     try {
@@ -171,7 +175,6 @@ export default function App() {
 
       <header className="header">
         <div className="header-title-container">
-          <Layers size={22} />
           <div>
             <h1 className="dashboard-title">IoT Environmental Monitor Panel</h1>
             <p className="dashboard-subtitle">Signed in as {session.name}</p>
@@ -180,15 +183,17 @@ export default function App() {
 
         <div className="header-actions">
           <span className={`connection-pill ${isLive ? 'is-live' : 'is-offline'}`}>
-            {isLive ? <Wifi size={14} /> : <WifiOff size={14} />}
             {isLive ? 'Live socket' : 'Offline cache'}
           </span>
           {errorSyncing && <span className="error-message">Connection lost — showing simulated data</span>}
+          <button className="theme-toggle-button" onClick={toggleTheme}>
+            {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
+          </button>
           <button className="sync-button" onClick={fetchSensorLogs}>
-            <RefreshCw size={16} /> Refresh
+            Refresh
           </button>
           <button className="logout-button" onClick={handleLogout}>
-            <LogOut size={16} /> Logout
+            Logout
           </button>
         </div>
       </header>
@@ -200,7 +205,6 @@ export default function App() {
             <h2 className="account-name">{session.name}</h2>
           </div>
           <div className="account-meta">
-            {session.role === 'admin' ? <ShieldCheck size={16} /> : <User size={16} />}
             <span>{session.role === 'admin' ? 'Administrator access' : 'User access'}</span>
           </div>
         </section>
@@ -212,14 +216,12 @@ export default function App() {
             title="Temperature Level"
             value={newestLog.temperature}
             unit="°C"
-            icon={Thermometer}
             isTemp={true}
           />
           <DashboardCard
             title="Relative Humidity"
             value={newestLog.humidity}
             unit="%"
-            icon={Droplets}
             isTemp={false}
           />
         </div>

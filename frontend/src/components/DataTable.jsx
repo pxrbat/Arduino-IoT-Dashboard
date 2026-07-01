@@ -25,8 +25,8 @@ export default function DataTable({ dataLogs }) {
                 return (
                   <tr key={log._id || index}>
                     <td>{new Date(log.timestamp).toLocaleString()}</td>
-                    <td style={{ color: isWarning ? '#222' : '#555', fontWeight: 500 }}>{log.temperature}°C</td>
-                    <td style={{ color: isWarning ? '#222' : '#555', fontWeight: 500 }}>{log.humidity}%</td>
+                    <td>{log.temperature}°C</td>
+                    <td>{log.humidity}%</td>
                     <td>
                       <span className={`status-badge ${isWarning ? 'status-alert' : 'status-normal'}`}>
                         {isWarning ? 'Flagged Warning' : 'Optimal'}

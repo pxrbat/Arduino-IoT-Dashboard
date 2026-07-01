@@ -28,16 +28,26 @@ export default function EnvironmentalChart({ dataLogs }) {
       {
         label: 'Temperature (°C)',
         data: chartData.map(log => log.temperature),
-        borderColor: '#222',
-        backgroundColor: 'rgba(34,34,34,0.07)',
-        tension: 0.2,
+        borderColor: '#4f46e5',
+        backgroundColor: 'rgba(79, 70, 229, 0.05)',
+        tension: 0.3,
+        borderWidth: 2,
+        pointRadius: 3,
+        pointBackgroundColor: '#4f46e5',
+        pointBorderColor: '#09090b',
+        pointBorderWidth: 2,
       },
       {
         label: 'Humidity (%)',
         data: chartData.map(log => log.humidity),
-        borderColor: '#888',
-        backgroundColor: 'rgba(136,136,136,0.07)',
-        tension: 0.2,
+        borderColor: '#a1a1a6',
+        backgroundColor: 'rgba(161, 161, 166, 0.05)',
+        tension: 0.3,
+        borderWidth: 2,
+        pointRadius: 3,
+        pointBackgroundColor: '#a1a1a6',
+        pointBorderColor: '#09090b',
+        pointBorderWidth: 2,
       },
     ],
   };
@@ -46,7 +56,34 @@ export default function EnvironmentalChart({ dataLogs }) {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: 'top' },
+      legend: {
+        position: 'top',
+        labels: {
+          color: '#a1a1a6',
+          font: { size: 12, weight: '500' },
+          usePointStyle: true,
+          padding: 15,
+        },
+      },
+      tooltip: {
+        backgroundColor: '#1a1a1f',
+        titleColor: '#ffffff',
+        bodyColor: '#a1a1a6',
+        borderColor: '#4f46e5',
+        borderWidth: 1,
+        padding: 10,
+        displayColors: false,
+      },
+    },
+    scales: {
+      x: {
+        grid: { color: '#1e1e24', drawBorder: false },
+        ticks: { color: '#80808a', font: { size: 11 } },
+      },
+      y: {
+        grid: { color: '#1e1e24', drawBorder: false },
+        ticks: { color: '#80808a', font: { size: 11 } },
+      },
     },
   };
 

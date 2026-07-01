@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Radio, Thermometer, Droplets } from 'lucide-react';
 import './Livefeed.css';
 
 function formatTime(iso) {
@@ -52,7 +51,6 @@ export default function LiveFeed({ dataLogs, isLive }) {
     <section className="live-feed-panel">
       <div className="live-feed-header">
         <div className="live-feed-title">
-          <Radio size={16} />
           <span>Live Transmission</span>
         </div>
         <div className={`live-feed-status ${isLive ? 'is-live' : 'is-offline'}`}>
@@ -73,10 +71,10 @@ export default function LiveFeed({ dataLogs, isLive }) {
             <span className="live-feed-tag">RX</span>
             <span className="live-feed-time">{formatTime(log.timestamp)}</span>
             <span className="live-feed-reading">
-              <Thermometer size={13} /> {Number(log.temperature).toFixed(1)}°C
+              {Number(log.temperature).toFixed(1)}°C
             </span>
             <span className="live-feed-reading">
-              <Droplets size={13} /> {Number(log.humidity).toFixed(1)}%
+              {Number(log.humidity).toFixed(1)}%
             </span>
           </li>
         ))}

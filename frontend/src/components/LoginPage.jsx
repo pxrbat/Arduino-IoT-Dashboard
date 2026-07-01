@@ -1,9 +1,24 @@
-import React, { useState } from 'react';
-import { Cpu, LockKeyhole, Mail, ShieldCheck, Sparkles, User } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { LockKeyhole } from 'lucide-react';
 
 export default function LoginPage({ onLogin, error }) {
     const [email, setEmail] = useState('admin@iot.local');
     const [password, setPassword] = useState('admin123');
+    const [theme, setTheme] = useState('dark');
+
+    useEffect(() => {
+        const savedTheme = window.localStorage.getItem('iot-dashboard-theme');
+        const preferredTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+        setTheme(preferredTheme);
+        document.documentElement.setAttribute('data-theme', preferredTheme);
+    }, []);
+
+    const toggleTheme = () => {
+        const newTheme = theme === 'dark' ? 'light' : 'dark';
+        setTheme(newTheme);
+        window.localStorage.setItem('iot-dashboard-theme', newTheme);
+        document.documentElement.setAttribute('data-theme', newTheme);
+    };
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -16,11 +31,17 @@ export default function LoginPage({ onLogin, error }) {
     };
 
     return (
-        <main className="login-page">
+        <div className="login-wrapper">
+            <div className="login-page-header">
+                <button className="theme-toggle-button" onClick={toggleTheme}>
+                    {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
+                </button>
+            </div>
+            <main className="login-page">
             <section className="login-hero">
                 <div className="login-brand">
                     <span className="login-brand-mark">
-                        <Cpu size={18} />
+                        ⚡
                     </span>
                     <div>
                         <p className="login-kicker">Arduino IoT Dashboard</p>
@@ -48,7 +69,7 @@ export default function LoginPage({ onLogin, error }) {
             <section className="login-card">
                 <div className="login-card-header">
                     <span className="login-card-badge">
-                        <LockKeyhole size={14} />
+                        <LockKeyhole size={13} />
                         Protected session
                     </span>
                     <h2>Log in</h2>
@@ -59,7 +80,6 @@ export default function LoginPage({ onLogin, error }) {
                     <label>
                         Email
                         <div className="login-field">
-                            <Mail size={16} />
                             <input
                                 type="email"
                                 value={email}
@@ -73,7 +93,6 @@ export default function LoginPage({ onLogin, error }) {
                     <label>
                         Password
                         <div className="login-field">
-                            <LockKeyhole size={16} />
                             <input
                                 type="password"
                                 value={password}
@@ -87,22 +106,20 @@ export default function LoginPage({ onLogin, error }) {
                     {error && <div className="login-error">{error}</div>}
 
                     <button className="login-submit" type="submit">
-                        <Sparkles size={16} />
                         Enter dashboard
                     </button>
                 </form>
 
                 <div className="login-presets">
                     <button type="button" onClick={() => usePreset('admin@iot.local', 'admin123')}>
-                        <ShieldCheck size={15} />
                         Admin demo
                     </button>
                     <button type="button" onClick={() => usePreset('user@iot.local', 'user123')}>
-                        <User size={15} />
                         Guest demo
                     </button>
                 </div>
             </section>
         </main>
+        </div>
     );
 }
