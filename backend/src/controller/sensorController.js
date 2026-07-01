@@ -1,23 +1,23 @@
 const SensorData = require("../models/SensorData");
-const {io } = require('../app.js')
+const { io } = require("../app.js");
 
 const addSensorData = async (req, res) => {
     const { temperature, humidity } = req.body;
     if (temperature === undefined || humidity === undefined) {
         return res.status(400).json({
-            message: "Temperature and Humidity are required fields."
+            message: "Temperature and Humidity are required fields.",
         });
     }
 
     if (temperature < 0 || temperature > 100) {
         return res.status(400).json({
-            message: "Temperature must be between 0 and 100 °C."
+            message: "Temperature must be between 0 and 100 °C.",
         });
     }
 
     if (humidity < 0 || humidity > 100) {
         return res.status(400).json({
-            message: "Humidity must be between 0 and 100 %."
+            message: "Humidity must be between 0 and 100 %.",
         });
     }
 
@@ -26,7 +26,7 @@ const addSensorData = async (req, res) => {
         res.status(201).json(data);
     } catch (error) {
         res.status(500).json({
-            message: error.message
+            message: error.message,
         });
     }
 };
@@ -37,27 +37,25 @@ const getSensorData = async (req, res) => {
         res.status(200).json(data);
     } catch (error) {
         res.status(500).json({
-            message: error.message
+            message: error.message,
         });
     }
 };
-
 
 const emitSensorData = async () => {
     try {
         const data = await SensorData.find().sort({ createdAt: -1 }).limit(1);
         console.log("Emitting sensor data:", data);
-        const Data = data.map(log => ({
+        const Data = data.map((log) => ({
             temperature: log.temperature,
             humidity: log.humidity,
-            timestamp: log.createdAt
+            timestamp: log.createdAt,
         }));
 
         if (data.length > 0) {
-            io.emit('newSensorData', Data);
+            io.emit("newSensorData", Data);
         }
-    }
-    catch (error) {
+    } catch (error) {
         console.error("Error emitting sensor data:", error);
     }
 };
@@ -68,9 +66,9 @@ const calculateAverageTemperature = async () => {
             {
                 $group: {
                     _id: null,
-                    averageTemperature: { $avg: "$temperature" }
-                }
-            }
+                    averageTemperature: { $avg: "$temperature" },
+                },
+            },
         ]);
         return result[0] ? result[0].averageTemperature : null;
     } catch (error) {
@@ -85,18 +83,16 @@ const calculateAverageHumidity = async () => {
             {
                 $group: {
                     _id: null,
-                    averageHumidity: { $avg: "$humidity" }
-                }
-
+                    averageHumidity: { $avg: "$humidity" },
+                },
+            },
         ]);
         return result[0] ? result[0].averageHumidity : null;
-    }
-    catch (error) {
+    } catch (error) {
         console.error("Error calculating average humidity:", error);
         return null;
     }
 };
-
 
 module.exports = {
     addSensorData,
