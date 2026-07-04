@@ -5,28 +5,31 @@ const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 const { Server } = require("socket.io");
 const { createServer } = require('node:http');
+const { initSocket } = require('./socket.js');
 
 const app = express();
 
 const httpServer = createServer(app);
-const io = new Server(httpServer, {
-  cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-  }
-});
+// console.log("HTTP server created:", httpServer);
+initSocket(httpServer); 
+// const io = new Server(httpServer, {
+//   cors: {
+//     origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+//     methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//     allowedHeaders: ['Content-Type', 'Authorization']
+//   }
+// });
 
-io.on('connection', (socket) => {
-  console.log('A client connected:', socket.id);
-  socket.on('disconnect', () => {
-    console.log('Client disconnected:', socket.id);
-  });
-});
+// io.on('connection', (socket) => {
+//   console.log('A client connected:', socket.id);
+//   socket.on('disconnect', () => {
+//     console.log('Client disconnected:', socket.id);
+//   });
+// });
 
-io.on('error', (err) => {
-  console.error('Socket.IO error:', err);
-});
+// io.on('error', (err) => {
+//   console.error('Socket.IO error:', err);
+// });
 
 
 
@@ -50,6 +53,6 @@ app.use("/api/sensor", require("./routes/SensorRoutes"));
 
 
 
-module.exports = { app, io, httpServer };
+module.exports = { app, httpServer };
 
 

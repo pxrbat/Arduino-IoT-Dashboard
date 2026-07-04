@@ -25,6 +25,7 @@ const RunServer = async () => {
 RunServer()
     .then(() => {
         console.log("Server started successfully");
+       
     })
     .catch((err) => {
         console.error("Error starting server:", err);

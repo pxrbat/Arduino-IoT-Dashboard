@@ -58,6 +58,7 @@ export default function App() {
     try {
       const response = await axios.get(API_END_POINT);
       setDataLogs(response.data);
+      console.log("Fetched sensor logs:", dataLogs);
       setErrorSyncing(false);
     } catch (err) {
       setErrorSyncing(true);
@@ -82,10 +83,18 @@ export default function App() {
 
     const socket = socketIOClient(SOCKET_URL);
 
-    socket.on('connect', () => setIsLive(true));
-    socket.on('disconnect', () => setIsLive(false));
+    socket.on('connect', () => {
+      console.log("Connected to socket server:", socket.id);
+      setIsLive(true);
+    });
+    socket.on('disconnect', () => {
+      console.log("Disconnected from socket server:", socket.id);
+      setIsLive(false);
+    });
     socket.on('newSensorData', (data) => {
+      console.log("Received new sensor data via socket:", data);
       const reading = Array.isArray(data) ? data[0] : data;
+      console.log("Processed reading:", reading);
       if (!reading) return;
       const newLog = {
         timestamp: reading.timestamp || new Date().toISOString(),
@@ -93,6 +102,8 @@ export default function App() {
         humidity: reading.humidity,
       };
       setDataLogs(currentLogs => [newLog, ...currentLogs].slice(0, 40));
+      
+      console.log("Fetched sensor logs:", dataLogs);
       setErrorSyncing(false);
     });
 
@@ -102,8 +113,8 @@ export default function App() {
   useEffect(() => {
     if (!session) return undefined;
     fetchSensorLogs();
-    const runtimeInterval = setInterval(fetchSensorLogs, 3000);
-    return () => clearInterval(runtimeInterval);
+    // const runtimeInterval = setInterval(fetchSensorLogs, 3000000);
+    // return () => clearInterval(runtimeInterval);
   }, [fetchSensorLogs, session]);
 
   const handleLogin = (email, password) => {

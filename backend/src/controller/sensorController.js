@@ -1,5 +1,5 @@
 const SensorData = require("../models/SensorData");
-const { io } = require("../app.js");
+const { getIO } = require("../socket.js");
 
 const addSensorData = async (req, res) => {
     const { temperature, humidity } = req.body;
@@ -23,6 +23,7 @@ const addSensorData = async (req, res) => {
 
     try {
         const data = await SensorData.create({ temperature, humidity });
+        emitSensorData();
         res.status(201).json(data);
     } catch (error) {
         res.status(500).json({
@@ -42,8 +43,9 @@ const getSensorData = async (req, res) => {
     }
 };
 
-const emitSensorData = async () => {
+const emitSensorData = async (req, res) => {
     try {
+        const io = getIO();
         const data = await SensorData.find().sort({ createdAt: -1 }).limit(1);
         console.log("Emitting sensor data:", data);
         const Data = data.map((log) => ({
@@ -51,12 +53,18 @@ const emitSensorData = async () => {
             humidity: log.humidity,
             timestamp: log.createdAt,
         }));
-
+        
         if (data.length > 0) {
             io.emit("newSensorData", Data);
+            console.log("Emitted sensor data:", Data);
         }
+        if(res){
+        res.status(200).json({ message: "Sensor data emitted successfully.", data: Data });}
     } catch (error) {
         console.error("Error emitting sensor data:", error);
+        if(res){
+        res.status(500).json({ message: "Error emitting sensor data." });
+    }
     }
 };
 
