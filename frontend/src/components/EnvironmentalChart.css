@@ -1,0 +1,17 @@
+.ec-panel {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    padding: 12px 14px;
+}
+
+.ec-heading {
+    margin: 0 0 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.ec-chart-wrapper {
+    height: 280px;
+}

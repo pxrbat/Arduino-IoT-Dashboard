@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { LockKeyhole } from 'lucide-react';
+import { LockKeyhole, Sun, Moon, Zap } from 'lucide-react';
+import './LoginPage.css';
 
 export default function LoginPage({ onLogin, error }) {
     const [email, setEmail] = useState('admin@iot.local');
@@ -31,95 +32,94 @@ export default function LoginPage({ onLogin, error }) {
     };
 
     return (
-        <div className="login-wrapper">
-            <div className="login-page-header">
-                <button className="theme-toggle-button" onClick={toggleTheme}>
-                    {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
+        <div className="lp-wrapper">
+            <div className="lp-header">
+                <button type="button" className="lp-theme-btn" onClick={toggleTheme}>
+                    {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+                    {theme === 'dark' ? 'Light' : 'Dark'}
                 </button>
             </div>
-            <main className="login-page">
-            <section className="login-hero">
-                <div className="login-brand">
-                    <span className="login-brand-mark">
-                        ⚡
-                    </span>
-                    <div>
-                        <p className="login-kicker">Arduino IoT Dashboard</p>
-                        <h1>Secure access for sensor operators</h1>
+
+            <main className="lp-page">
+                <section className="lp-hero">
+                    <div className="lp-brand">
+                        <span className="lp-brand-mark"><Zap size={16} strokeWidth={2} /></span>
+                        <div>
+                            <p className="lp-kicker">Arduino IoT Dashboard</p>
+                            <h1 className="lp-hero-title">Secure access for sensor operators</h1>
+                        </div>
                     </div>
-                </div>
 
-                <p className="login-copy">
-                    Sign in to view live telemetry, compare trends, and open the admin tools for the
-                    ESP32 stack.
-                </p>
+                    <p className="lp-copy">
+                        Sign in to view live telemetry, compare trends, and open the admin tools for the ESP32 stack.
+                    </p>
 
-                <div className="login-stats">
-                    <article>
-                        <strong>Live feed</strong>
-                        <span>Socket-driven readings</span>
-                    </article>
-                    <article>
-                        <strong>Admin mode</strong>
-                        <span>Threshold controls and log actions</span>
-                    </article>
-                </div>
-            </section>
+                    <div className="lp-stats">
+                        <article className="lp-stat-card">
+                            <strong>Live feed</strong>
+                            <span>Socket-driven readings</span>
+                        </article>
+                        <article className="lp-stat-card">
+                            <strong>Admin mode</strong>
+                            <span>Threshold controls and log actions</span>
+                        </article>
+                    </div>
+                </section>
 
-            <section className="login-card">
-                <div className="login-card-header">
-                    <span className="login-card-badge">
-                        <LockKeyhole size={13} />
-                        Protected session
-                    </span>
-                    <h2>Log in</h2>
-                    <p>Use one of the demo accounts below to enter the dashboard.</p>
-                </div>
+                <section className="lp-card">
+                    <div className="lp-card-header">
+                        <span className="lp-card-badge">
+                            <LockKeyhole size={12} />
+                            Protected session
+                        </span>
+                        <h2 className="lp-card-title">Log in</h2>
+                        <p className="lp-card-desc">Use one of the demo accounts below to enter the dashboard.</p>
+                    </div>
 
-                <form className="login-form" onSubmit={handleSubmit}>
-                    <label>
-                        Email
-                        <div className="login-field">
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(event) => setEmail(event.target.value)}
-                                placeholder="name@company.com"
-                                autoComplete="username"
-                            />
-                        </div>
-                    </label>
+                    <form className="lp-form" onSubmit={handleSubmit}>
+                        <label className="lp-form-label">
+                            Email
+                            <div className="lp-field">
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(event) => setEmail(event.target.value)}
+                                    placeholder="name@company.com"
+                                    autoComplete="username"
+                                />
+                            </div>
+                        </label>
 
-                    <label>
-                        Password
-                        <div className="login-field">
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(event) => setPassword(event.target.value)}
-                                placeholder="Enter password"
-                                autoComplete="current-password"
-                            />
-                        </div>
-                    </label>
+                        <label className="lp-form-label">
+                            Password
+                            <div className="lp-field">
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(event) => setPassword(event.target.value)}
+                                    placeholder="Enter password"
+                                    autoComplete="current-password"
+                                />
+                            </div>
+                        </label>
 
-                    {error && <div className="login-error">{error}</div>}
+                        {error && <div className="lp-error">{error}</div>}
 
-                    <button className="login-submit" type="submit">
-                        Enter dashboard
-                    </button>
-                </form>
+                        <button className="lp-submit" type="submit">
+                            Enter dashboard
+                        </button>
+                    </form>
 
-                <div className="login-presets">
-                    <button type="button" onClick={() => usePreset('admin@iot.local', 'admin123')}>
-                        Admin demo
-                    </button>
-                    <button type="button" onClick={() => usePreset('user@iot.local', 'user123')}>
-                        Guest demo
-                    </button>
-                </div>
-            </section>
-        </main>
+                    <div className="lp-presets">
+                        <button type="button" className="lp-preset-btn" onClick={() => usePreset('admin@iot.local', 'admin123')}>
+                            Admin demo
+                        </button>
+                        <button type="button" className="lp-preset-btn" onClick={() => usePreset('user@iot.local', 'user123')}>
+                            Guest demo
+                        </button>
+                    </div>
+                </section>
+            </main>
         </div>
     );
 }

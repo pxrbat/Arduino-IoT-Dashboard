@@ -1,0 +1,82 @@
+.dc-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    padding: 12px;
+    color: var(--text);
+}
+
+.dc-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 5px;
+}
+
+.dc-icon.is-temp {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.dc-icon.is-humidity {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.dc-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.dc-title {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.dc-value-row {
+    display: flex;
+    align-items: baseline;
+    margin-top: 4px;
+}
+
+.dc-value {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1;
+}
+
+.dc-unit {
+    font-size: 13px;
+    color: var(--text-soft);
+    margin-left: 3px;
+}
+
+.dc-status {
+    display: inline-flex;
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 3px;
+}
+
+.dc-status.is-normal {
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.dc-status.is-alert {
+    background: #fffbeb;
+    color: #b45309;
+}

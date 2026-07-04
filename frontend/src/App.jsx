@@ -1,29 +1,21 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
+import socketIOClient from 'socket.io-client';
+import DashboardLayout from './components/layout/DashboardLayout';
 import DashboardCard from './components/DashboardCard';
 import EnvironmentalChart from './components/EnvironmentalChart';
 import DataTable from './components/DataTable';
 import AdminControls from './components/AdminControls';
 import LiveFeed from './components/Livefeed';
 import LoginPage from './components/LoginPage';
-import './App.css';
-import socketIOClient from 'socket.io-client';
 
 const API_END_POINT = 'http://localhost:5000/api/sensor/data';
 const SOCKET_URL = 'http://localhost:5000';
 const SESSION_STORAGE_KEY = 'iot-dashboard-session';
 
 const DEMO_USERS = {
-  'admin@iot.local': {
-    password: 'admin123',
-    name: 'System Admin',
-    role: 'admin',
-  },
-  'user@iot.local': {
-    password: 'user123',
-    name: 'Guest Operator',
-    role: 'user',
-  },
+  'admin@iot.local': { password: 'admin123', name: 'System Admin', role: 'admin' },
+  'user@iot.local': { password: 'user123', name: 'Guest Operator', role: 'user' },
 };
 
 export default function App() {
@@ -33,14 +25,11 @@ export default function App() {
   const [errorSyncing, setErrorSyncing] = useState(false);
   const [isLive, setIsLive] = useState(false);
   const [theme, setTheme] = useState('dark');
+  const [activeSection, setActiveSection] = useState('overview');
 
   useEffect(() => {
     const savedSession = window.localStorage.getItem(SESSION_STORAGE_KEY);
-
-    if (!savedSession) {
-      return;
-    }
-
+    if (!savedSession) return;
     try {
       const parsedSession = JSON.parse(savedSession);
       if (parsedSession?.email && parsedSession?.role) {
@@ -76,7 +65,7 @@ export default function App() {
         const mockupReading = {
           timestamp: new Date().toISOString(),
           temperature: parseFloat((23 + Math.random() * 5).toFixed(1)),
-          humidity: parseFloat((60 + Math.random() * 12).toFixed(1))
+          humidity: parseFloat((60 + Math.random() * 12).toFixed(1)),
         };
         return [mockupReading, ...currentLogs].slice(0, 40);
       });
@@ -93,42 +82,25 @@ export default function App() {
 
     const socket = socketIOClient(SOCKET_URL);
 
-    socket.on('connect', () => {
-      console.log('Connected to Socket.IO server');
-      setIsLive(true);
-    });
-
-    socket.on('disconnect', () => {
-      console.log('Disconnected from Socket.IO server');
-      setIsLive(false);
-    });
-
-    // Backend emits this event after a reading lands on /api/sensor/emit,
-    // roughly every 2 seconds while the ESP32 is reporting.
+    socket.on('connect', () => setIsLive(true));
+    socket.on('disconnect', () => setIsLive(false));
     socket.on('newSensorData', (data) => {
       const reading = Array.isArray(data) ? data[0] : data;
       if (!reading) return;
-
       const newLog = {
         timestamp: reading.timestamp || new Date().toISOString(),
         temperature: reading.temperature,
-        humidity: reading.humidity
+        humidity: reading.humidity,
       };
-
       setDataLogs(currentLogs => [newLog, ...currentLogs].slice(0, 40));
       setErrorSyncing(false);
     });
 
-    return () => {
-      socket.disconnect();
-    };
+    return () => socket.disconnect();
   }, [session]);
 
   useEffect(() => {
-    if (!session) {
-      return undefined;
-    }
-
+    if (!session) return undefined;
     fetchSensorLogs();
     const runtimeInterval = setInterval(fetchSensorLogs, 3000);
     return () => clearInterval(runtimeInterval);
@@ -143,12 +115,7 @@ export default function App() {
       return false;
     }
 
-    const nextSession = {
-      email: normalizedEmail,
-      name: account.name,
-      role: account.role,
-    };
-
+    const nextSession = { email: normalizedEmail, name: account.name, role: account.role };
     setSession(nextSession);
     setLoginError('');
     window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(nextSession));
@@ -169,68 +136,49 @@ export default function App() {
   }
 
   return (
-    <div className="app-shell">
-      <div className="app-shell-glow app-shell-glow-a" />
-      <div className="app-shell-glow app-shell-glow-b" />
-
-      <header className="header">
-        <div className="header-title-container">
-          <div>
-            <h1 className="dashboard-title">IoT Environmental Monitor Panel</h1>
-            <p className="dashboard-subtitle">Signed in as {session.name}</p>
+    <DashboardLayout
+      activeSection={activeSection}
+      onNavigate={setActiveSection}
+      session={session}
+      isLive={isLive}
+      errorSyncing={errorSyncing}
+      theme={theme}
+      onToggleTheme={toggleTheme}
+      onRefresh={fetchSensorLogs}
+      onLogout={handleLogout}
+    >
+      {activeSection === 'overview' && (
+        <>
+          <div className="dl-cards-grid">
+            <DashboardCard
+              title="Temperature Level"
+              value={newestLog.temperature}
+              unit="°C"
+              isTemp={true}
+            />
+            <DashboardCard
+              title="Relative Humidity"
+              value={newestLog.humidity}
+              unit="%"
+              isTemp={false}
+            />
           </div>
-        </div>
 
-        <div className="header-actions">
-          <span className={`connection-pill ${isLive ? 'is-live' : 'is-offline'}`}>
-            {isLive ? 'Live socket' : 'Offline cache'}
-          </span>
-          {errorSyncing && <span className="error-message">Connection lost — showing simulated data</span>}
-          <button className="theme-toggle-button" onClick={toggleTheme}>
-            {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
-          </button>
-          <button className="sync-button" onClick={fetchSensorLogs}>
-            Refresh
-          </button>
-          <button className="logout-button" onClick={handleLogout}>
-            Logout
-          </button>
-        </div>
-      </header>
+          <EnvironmentalChart dataLogs={dataLogs} />
+        </>
+      )}
 
-      <main className="dashboard-container">
-        <section className="account-strip">
-          <div>
-            <p className="account-label">Session</p>
-            <h2 className="account-name">{session.name}</h2>
-          </div>
-          <div className="account-meta">
-            <span>{session.role === 'admin' ? 'Administrator access' : 'User access'}</span>
-          </div>
-        </section>
-
-        {session.role === 'admin' && <AdminControls onRefresh={fetchSensorLogs} />}
-
-        <div className="cards-grid">
-          <DashboardCard
-            title="Temperature Level"
-            value={newestLog.temperature}
-            unit="°C"
-            isTemp={true}
-          />
-          <DashboardCard
-            title="Relative Humidity"
-            value={newestLog.humidity}
-            unit="%"
-            isTemp={false}
-          />
-        </div>
-
+      {activeSection === 'telemetry' && (
         <LiveFeed dataLogs={dataLogs} isLive={isLive} />
+      )}
 
-        <EnvironmentalChart dataLogs={dataLogs} />
+      {activeSection === 'logs' && (
         <DataTable dataLogs={dataLogs} />
-      </main>
-    </div>
+      )}
+
+      {activeSection === 'admin' && session.role === 'admin' && (
+        <AdminControls onRefresh={fetchSensorLogs} />
+      )}
+    </DashboardLayout>
   );
 }

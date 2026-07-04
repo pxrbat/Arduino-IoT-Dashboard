@@ -10,6 +10,7 @@ import {
   Legend,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import './EnvironmentalChart.css';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -28,26 +29,26 @@ export default function EnvironmentalChart({ dataLogs }) {
       {
         label: 'Temperature (°C)',
         data: chartData.map(log => log.temperature),
-        borderColor: '#4f46e5',
-        backgroundColor: 'rgba(79, 70, 229, 0.05)',
-        tension: 0.3,
-        borderWidth: 2,
-        pointRadius: 3,
-        pointBackgroundColor: '#4f46e5',
-        pointBorderColor: '#09090b',
-        pointBorderWidth: 2,
+        borderColor: '#dc2626',
+        backgroundColor: 'rgba(220, 38, 38, 0.04)',
+        tension: 0.25,
+        borderWidth: 1.5,
+        pointRadius: 2,
+        pointBackgroundColor: '#dc2626',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 1,
       },
       {
         label: 'Humidity (%)',
         data: chartData.map(log => log.humidity),
-        borderColor: '#a1a1a6',
-        backgroundColor: 'rgba(161, 161, 166, 0.05)',
-        tension: 0.3,
-        borderWidth: 2,
-        pointRadius: 3,
-        pointBackgroundColor: '#a1a1a6',
-        pointBorderColor: '#09090b',
-        pointBorderWidth: 2,
+        borderColor: '#2563eb',
+        backgroundColor: 'rgba(37, 99, 235, 0.04)',
+        tension: 0.25,
+        borderWidth: 1.5,
+        pointRadius: 2,
+        pointBackgroundColor: '#2563eb',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 1,
       },
     ],
   };
@@ -58,39 +59,44 @@ export default function EnvironmentalChart({ dataLogs }) {
     plugins: {
       legend: {
         position: 'top',
+        align: 'end',
         labels: {
-          color: '#a1a1a6',
-          font: { size: 12, weight: '500' },
+          color: '#737373',
+          font: { size: 11, weight: '500' },
           usePointStyle: true,
-          padding: 15,
+          padding: 12,
+          boxHeight: 6,
+          boxWidth: 6,
         },
       },
       tooltip: {
-        backgroundColor: '#1a1a1f',
+        backgroundColor: '#171717',
         titleColor: '#ffffff',
-        bodyColor: '#a1a1a6',
-        borderColor: '#4f46e5',
+        bodyColor: '#d4d4d4',
+        borderColor: '#404040',
         borderWidth: 1,
-        padding: 10,
+        padding: 8,
+        titleFont: { size: 11 },
+        bodyFont: { size: 11 },
         displayColors: false,
       },
     },
     scales: {
       x: {
-        grid: { color: '#1e1e24', drawBorder: false },
-        ticks: { color: '#80808a', font: { size: 11 } },
+        grid: { color: '#f0f0f0', drawBorder: false },
+        ticks: { color: '#a3a3a3', font: { size: 10 } },
       },
       y: {
-        grid: { color: '#1e1e24', drawBorder: false },
-        ticks: { color: '#80808a', font: { size: 11 } },
+        grid: { color: '#f0f0f0', drawBorder: false },
+        ticks: { color: '#a3a3a3', font: { size: 10 } },
       },
     },
   };
 
   return (
-    <div className="section-panel">
+    <div className="ec-panel">
       <h3>Real-Time Environmental Fluctuations</h3>
-      <div className="chart-wrapper">
+      <div className="ec-chart-wrapper">
         <Line data={datasetConfig} options={chartOptions} />
       </div>
     </div>

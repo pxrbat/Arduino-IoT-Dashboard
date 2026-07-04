@@ -1,11 +1,12 @@
 import React from 'react';
+import './DataTable.css';
 
 export default function DataTable({ dataLogs }) {
   return (
-    <div className="section-panel">
-      <h3>Incoming Sensed Streams (DHT22)</h3>
-      <div className="table-container">
-        <table className="custom-table">
+    <div className="dt-panel">
+      <h3 className='dt-heading'>Incoming Sensed Streams (DHT22)</h3>
+      <div className="dt-table-container">
+        <table className="dt-table">
           <thead>
             <tr>
               <th>Timestamp</th>
@@ -17,7 +18,7 @@ export default function DataTable({ dataLogs }) {
           <tbody>
             {dataLogs.length === 0 ? (
               <tr>
-                <td colSpan="4" className="loading-text">No packets recorded from Arduino Node MCU yet.</td>
+                <td colSpan="4" className="dt-empty">No packets recorded from Arduino Node MCU yet.</td>
               </tr>
             ) : (
               dataLogs.map((log, index) => {
@@ -28,7 +29,7 @@ export default function DataTable({ dataLogs }) {
                     <td>{log.temperature}°C</td>
                     <td>{log.humidity}%</td>
                     <td>
-                      <span className={`status-badge ${isWarning ? 'status-alert' : 'status-normal'}`}>
+                      <span className={`dt-status ${isWarning ? 'is-alert' : 'is-normal'}`}>
                         {isWarning ? 'Flagged Warning' : 'Optimal'}
                       </span>
                     </td>
