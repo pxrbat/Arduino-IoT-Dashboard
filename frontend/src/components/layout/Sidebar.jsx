@@ -36,7 +36,7 @@ export default function Sidebar({
     onNavigate,
     isMobileOpen,
     onCloseMobile,
-    orgName = 'Sensor Ops',
+    orgName = 'IoT Dashboard',
     isLive = false,
 }) {
     const [isCollapsed, setIsCollapsed] = useCollapsedState();

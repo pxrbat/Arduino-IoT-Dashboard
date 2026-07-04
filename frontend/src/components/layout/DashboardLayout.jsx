@@ -28,7 +28,7 @@ export default function DashboardLayout({
                 }}
                 isMobileOpen={isMobileOpen}
                 onCloseMobile={() => setIsMobileOpen(false)}
-                orgName="Sensor Ops"
+                orgName="IoT Dashboard"
                 isLive={isLive}
             />
 
