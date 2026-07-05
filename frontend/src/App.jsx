@@ -56,9 +56,9 @@ export default function App() {
 
   const fetchSensorLogs = useCallback(async () => {
     try {
-      const response = await axios.get(API_END_POINT);
+      socketIOClient(SOCKET_URL).emit('requestSensorData');
       setDataLogs(response.data);
-      console.log("Fetched sensor logs:", dataLogs);
+      console.log("Fetched sensor logs:", response.data);
       setErrorSyncing(false);
     } catch (err) {
       setErrorSyncing(true);
@@ -113,8 +113,8 @@ export default function App() {
   useEffect(() => {
     if (!session) return undefined;
     fetchSensorLogs();
-    // const runtimeInterval = setInterval(fetchSensorLogs, 3000000);
-    // return () => clearInterval(runtimeInterval);
+     const runtimeInterval = setInterval(fetchSensorLogs, 3000);
+     return () => clearInterval(runtimeInterval);
   }, [fetchSensorLogs, session]);
 
   const handleLogin = (email, password) => {
