@@ -1,17 +1,181 @@
-.ec-panel {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 6px;
-    padding: 12px 14px;
+.ec-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 16px;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-.ec-heading {
-    margin: 0 0 10px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text);
+.ec-panel {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f0f0f0;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ec-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.ec-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.ec-panel h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #171717;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ec-panel h3 .icon {
+  font-size: 20px;
+}
+
+.stats {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  font-size: 12px;
+  color: #737373;
+  background: #f8f8f8;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-weight: 500;
+}
+
+.stat:first-child {
+  background: #f0f0f0;
+  color: #171717;
+}
+
+.temperature-panel .stat:first-child {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.humidity-panel .stat:first-child {
+  background: #dbeafe;
+  color: #2563eb;
 }
 
 .ec-chart-wrapper {
-    height: 280px;
+  height: 250px;
+  width: 100%;
+  position: relative;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .ec-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .ec-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 12px;
+  }
+
+  .ec-panel {
+    padding: 16px;
+  }
+
+  .ec-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .stats {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .stat {
+    font-size: 11px;
+    padding: 3px 10px;
+  }
+
+  .ec-chart-wrapper {
+    height: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ec-container {
+    padding: 8px;
+  }
+
+  .ec-panel {
+    padding: 12px;
+  }
+
+  .ec-panel h3 {
+    font-size: 14px;
+  }
+
+  .stats {
+    gap: 8px;
+  }
+
+  .stat {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
+
+  .ec-chart-wrapper {
+    height: 180px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .ec-panel {
+    background: #1a1a1a;
+    border-color: #333333;
+  }
+
+  .ec-panel h3 {
+    color: #ffffff;
+  }
+
+  .stat {
+    background: #2a2a2a;
+    color: #a3a3a3;
+  }
+
+  .stat:first-child {
+    background: #333333;
+    color: #ffffff;
+  }
+
+  .temperature-panel .stat:first-child {
+    background: #3d1f1f;
+    color: #f87171;
+  }
+
+  .humidity-panel .stat:first-child {
+    background: #1a2f4a;
+    color: #60a5fa;
+  }
 }

@@ -23,50 +23,63 @@ export default function EnvironmentalChart({ dataLogs }) {
     return time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   });
 
-  const datasetConfig = {
+  // Temperature chart configuration
+  const temperatureConfig = {
     labels,
     datasets: [
       {
         label: 'Temperature (°C)',
         data: chartData.map(log => log.temperature),
         borderColor: '#dc2626',
-        backgroundColor: 'rgba(220, 38, 38, 0.04)',
-        tension: 0.25,
-        borderWidth: 1.5,
-        pointRadius: 2,
+        backgroundColor: 'rgba(220, 38, 38, 0.1)',
+        fill: true,
+        tension: 0.3,
+        borderWidth: 2,
+        pointRadius: 3,
         pointBackgroundColor: '#dc2626',
         pointBorderColor: '#ffffff',
-        pointBorderWidth: 1,
-      },
-      {
-        label: 'Humidity (%)',
-        data: chartData.map(log => log.humidity),
-        borderColor: '#2563eb',
-        backgroundColor: 'rgba(37, 99, 235, 0.04)',
-        tension: 0.25,
-        borderWidth: 1.5,
-        pointRadius: 2,
-        pointBackgroundColor: '#2563eb',
-        pointBorderColor: '#ffffff',
-        pointBorderWidth: 1,
+        pointBorderWidth: 1.5,
+        pointHoverRadius: 6,
       },
     ],
   };
 
-  const chartOptions = {
+  // Humidity chart configuration
+  const humidityConfig = {
+    labels,
+    datasets: [
+      {
+        label: 'Humidity (%)',
+        data: chartData.map(log => log.humidity),
+        borderColor: '#2563eb',
+        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+        fill: true,
+        tension: 0.3,
+        borderWidth: 2,
+        pointRadius: 3,
+        pointBackgroundColor: '#2563eb',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 1.5,
+        pointHoverRadius: 6,
+      },
+    ],
+  };
+
+  // Shared chart options
+  const getChartOptions = (label, color) => ({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top',
-        align: 'end',
+        align: 'center',
         labels: {
           color: '#737373',
-          font: { size: 11, weight: '500' },
+          font: { size: 12, weight: '600' },
           usePointStyle: true,
-          padding: 12,
-          boxHeight: 6,
-          boxWidth: 6,
+          padding: 16,
+          boxHeight: 8,
+          boxWidth: 8,
         },
       },
       tooltip: {
@@ -75,29 +88,95 @@ export default function EnvironmentalChart({ dataLogs }) {
         bodyColor: '#d4d4d4',
         borderColor: '#404040',
         borderWidth: 1,
-        padding: 8,
-        titleFont: { size: 11 },
-        bodyFont: { size: 11 },
-        displayColors: false,
+        padding: 10,
+        titleFont: { size: 12, weight: '600' },
+        bodyFont: { size: 12 },
+        displayColors: true,
+        callbacks: {
+          label: function(context) {
+            return `${context.dataset.label}: ${context.parsed.y.toFixed(1)}`;
+          }
+        }
       },
     },
     scales: {
       x: {
-        grid: { color: '#f0f0f0', drawBorder: false },
-        ticks: { color: '#a3a3a3', font: { size: 10 } },
+        grid: { 
+          color: 'rgba(0,0,0,0.05)', 
+          drawBorder: false,
+        },
+        ticks: { 
+          color: '#a3a3a3', 
+          font: { size: 10 },
+          maxTicksLimit: 10,
+        },
       },
       y: {
-        grid: { color: '#f0f0f0', drawBorder: false },
-        ticks: { color: '#a3a3a3', font: { size: 10 } },
+        grid: { 
+          color: 'rgba(0,0,0,0.05)', 
+          drawBorder: false,
+        },
+        ticks: { 
+          color: '#a3a3a3', 
+          font: { size: 10 },
+          callback: function(value) {
+            return value + (label === 'Temperature' ? '°C' : '%');
+          }
+        },
       },
     },
-  };
+    interaction: {
+      intersect: false,
+      mode: 'index',
+    },
+  });
 
   return (
-    <div className="ec-panel">
-      <h3>Real-Time Environmental Fluctuations</h3>
-      <div className="ec-chart-wrapper">
-        <Line data={datasetConfig} options={chartOptions} />
+    <div className="ec-container">
+      <div className="ec-panel temperature-panel">
+        <div className="ec-header">
+          <h3>
+            
+            Temperature
+          </h3>
+          <div className="stats">
+            <span className="stat">
+              Current: {chartData.length > 0 ? chartData[chartData.length - 1].temperature.toFixed(1) : '--'}°C
+            </span>
+            <span className="stat">
+              Min: {chartData.length > 0 ? Math.min(...chartData.map(d => d.temperature)).toFixed(1) : '--'}°C
+            </span>
+            <span className="stat">
+              Max: {chartData.length > 0 ? Math.max(...chartData.map(d => d.temperature)).toFixed(1) : '--'}°C
+            </span>
+          </div>
+        </div>
+        <div className="ec-chart-wrapper">
+          <Line data={temperatureConfig} options={getChartOptions('Temperature', '#dc2626')} />
+        </div>
+      </div>
+
+      <div className="ec-panel humidity-panel">
+        <div className="ec-header">
+          <h3>
+            
+            Humidity
+          </h3>
+          <div className="stats">
+            <span className="stat">
+              Current: {chartData.length > 0 ? chartData[chartData.length - 1].humidity.toFixed(1) : '--'}%
+            </span>
+            <span className="stat">
+              Min: {chartData.length > 0 ? Math.min(...chartData.map(d => d.humidity)).toFixed(1) : '--'}%
+            </span>
+            <span className="stat">
+              Max: {chartData.length > 0 ? Math.max(...chartData.map(d => d.humidity)).toFixed(1) : '--'}%
+            </span>
+          </div>
+        </div>
+        <div className="ec-chart-wrapper">
+          <Line data={humidityConfig} options={getChartOptions('Humidity', '#2563eb')} />
+        </div>
       </div>
     </div>
   );
