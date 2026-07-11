@@ -2,7 +2,7 @@ const axios = require("axios");
 
 const API_URL = "http://localhost:5000/api/sensor/data";
 
-console.log("🚀 Sensor Simulator Started");
+console.log("Sensor Simulator Started");
 
 function randomBetween(min, max) {
     return Number((Math.random() * (max - min) + min).toFixed(2));
@@ -19,12 +19,12 @@ async function sendSensorData() {
 
         console.log(
             `[${new Date().toLocaleTimeString()}]`,
-            `🌡️ ${data.temperature}°C`,
-            `💧 ${data.humidity}%`,
-            `✅ ${response.status}`
+            `${data.temperature}°C`,
+            `${data.humidity}%`,
+            `${response.status}`
         );
     } catch (error) {
-        console.error("❌ Failed to send data");
+        console.error("Failed to send data");
 
         if (error.response) {
             console.error(error.response.data);
