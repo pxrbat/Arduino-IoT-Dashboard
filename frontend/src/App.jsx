@@ -61,8 +61,15 @@ export default function App() {
   const fetchSensorLogs = useCallback(async () => {
     try {
       const response = await axios.get(API_END_POINT);
-      setDataLogs(Array.isArray(response.data) ? response.data.slice(0, 40) : []);
-      setErrorSyncing(false);
+      setDataLogs(
+  Array.isArray(response.data)
+    ? response.data.slice(0, 40).map(log => ({
+        timestamp: log.createdAt,
+        temperature: log.temperature,
+        humidity: log.humidity,
+      }))
+    : []
+);
     } catch (err) {
       setErrorSyncing(true);
       setDataLogs((currentLogs) => {

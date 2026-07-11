@@ -65,7 +65,7 @@ export default function EnvironmentalChart({ dataLogs }) {
   const chartData = [...dataLogs].reverse().slice(-10);
 
   const labels = chartData.map((log) => {
-    const time = new Date(log.createdAt);
+    const time = new Date(log.timestamp);
     return time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   });
 
