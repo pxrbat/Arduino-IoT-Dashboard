@@ -1,5 +1,5 @@
 // src/components/dashboard/AdminControls.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ShieldAlert, Trash2 } from 'lucide-react';
 import './AdminControls.css';
@@ -7,9 +7,23 @@ import './AdminControls.css';
 export default function AdminControls({ onRefresh }) {
   const [alertThreshold, setAlertThreshold] = useState(32);
 
-  const handleUpdateThreshold = () => {
-    alert(`Threshold Updated to ${alertThreshold}°C! (Are you sure you want to proceed?)`);
-  };
+  const handleUpdateThreshold = async () => {
+    try {
+        const response = await axios.put(
+            "http://localhost:5000/api/sensor/threshold",
+            {
+                tempThreshold: Number(alertThreshold),
+            }
+        );
+
+        setAlertThreshold(response.data.tempThreshold);
+
+        alert("Threshold updated successfully!");
+    } catch (err) {
+        console.error(err);
+        alert("Failed to update threshold.");
+    }
+};
 
   const handleClearLogs = async () => {
     if (window.confirm("Are you sure you want to wipe out historical telemetry database logs?")) {
@@ -61,4 +75,19 @@ export default function AdminControls({ onRefresh }) {
       </div>
     </div>
   );
+  useEffect(() => {
+    const loadThreshold = async () => {
+        try {
+            const response = await axios.get(
+                "http://localhost:5000/api/sensor/threshold"
+            );
+
+            setAlertThreshold(response.data.tempThreshold);
+        } catch (err) {
+            console.error("Failed to load threshold:", err);
+        }
+    };
+
+    loadThreshold();
+}, []);
 }
