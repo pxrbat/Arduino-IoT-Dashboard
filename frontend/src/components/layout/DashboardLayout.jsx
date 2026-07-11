@@ -8,6 +8,7 @@ const SECTION_LABELS = {
     overview: 'Overview',
     telemetry: 'Live Telemetry',
     logs: 'Data Logs',
+    users: 'Manage Users',
     admin: 'Admin',
 };
 
@@ -48,6 +49,7 @@ export default function DashboardLayout({
                 onCloseMobile={() => setIsMobileOpen(false)}
                 orgName="IoT Dashboard"
                 isLive={isLive}
+                role={session.role}
             />
 
             <div className="dl-main-col">

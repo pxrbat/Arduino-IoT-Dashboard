@@ -9,6 +9,7 @@ import DataTable from './components/DataTable';
 import AdminControls from './components/AdminControls';
 import LiveFeed from './components/Livefeed';
 import LoginPage from './components/LoginPage';
+import ManageUsers from './components/ManageUsers';
 
 const API_END_POINT = 'http://localhost:5000/api/sensor/data';
 const SOCKET_URL = 'http://localhost:5000';
@@ -122,8 +123,8 @@ export default function App() {
         email,
         password,
       });
-      const { token, name, role } = response.data;
-      const nextSession = { email, name, role, token };
+      const { _id, token, name, role } = response.data;
+      const nextSession = { _id, email, name, role, token };
       setSession(nextSession);
       window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(nextSession));
       setIsAuthLoading(false);
@@ -145,8 +146,8 @@ export default function App() {
         email,
         password,
       });
-      const { token, role } = response.data;
-      const nextSession = { email, name, role, token };
+      const { _id, token, role } = response.data;
+      const nextSession = { _id, email, name, role, token };
       setSession(nextSession);
       window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(nextSession));
       setIsAuthLoading(false);
@@ -204,6 +205,8 @@ export default function App() {
       {activeSection === 'telemetry' && <LiveFeed dataLogs={dataLogs} isLive={isLive} />}
 
       {activeSection === 'logs' && <DataTable dataLogs={dataLogs} />}
+
+      {activeSection === 'users' && session.role === 'admin' && (<ManageUsers session={session} />)}
 
       {activeSection === 'admin' && session.role === 'admin' && (
         <AdminControls onRefresh={fetchSensorLogs} />

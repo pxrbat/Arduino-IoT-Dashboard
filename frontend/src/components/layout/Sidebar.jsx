@@ -9,6 +9,7 @@ import {
     ChevronsRight,
     X,
     CircleDot,
+    UserCog,
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -16,7 +17,20 @@ const NAV_ITEMS = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard, shortcut: '1' },
     { id: 'telemetry', label: 'Live Telemetry', icon: Activity, shortcut: '2' },
     { id: 'logs', label: 'Data Logs', icon: Table2, shortcut: '3' },
-    { id: 'admin', label: 'Admin', icon: ShieldCheck, shortcut: '4' },
+    {
+        id: 'users',
+        label: 'Manage Users',
+        icon: UserCog,
+        shortcut: '4',
+        adminOnly: true
+    },
+    {
+        id: 'admin',
+        label: 'Admin',
+        icon: ShieldCheck,
+        shortcut: '5',       
+        adminOnly: true       
+    },
 ];
 
 function useCollapsedState() {
@@ -39,6 +53,7 @@ export default function Sidebar({
     onCloseMobile,
     orgName = 'IoT Dashboard',
     isLive = false,
+    role,
 }) {
     const [isCollapsed, setIsCollapsed] = useCollapsedState();
 
@@ -79,7 +94,7 @@ export default function Sidebar({
                 <nav className="sidebar-nav">
                     {!isCollapsed && <span className="sidebar-nav-eyebrow">Menu</span>}
                     <ul className="sidebar-nav-list">
-                        {NAV_ITEMS.map(({ id, label, icon: Icon, shortcut }) => {
+                        {NAV_ITEMS.filter((item) =>!item.adminOnly || role === 'admin').map(({ id, label, icon: Icon, shortcut }) => {
                             const isActive = activeSection === id;
                             return (
                                 <li key={id}>
