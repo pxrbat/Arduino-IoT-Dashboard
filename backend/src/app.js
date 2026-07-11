@@ -27,11 +27,11 @@ app.use(
 app.use(express.urlencoded({ extended: true }));
 app.use(express.text({ type: 'text/*' }));
 
-
-
 // Auth Routes
 app.use("/api/auth", require("./routes/authRoutes"));
 
 app.use("/api/sensor", require("./routes/SensorRoutes"));
+
+app.use("/api/users", require("./routes/userRoutes"));
 
 module.exports = { app, httpServer };
