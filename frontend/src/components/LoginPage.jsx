@@ -301,27 +301,6 @@ export default function LoginPage({ onLogin, onRegister, error, loading = false 
                             {isRegisterMode ? 'Log in' : 'Register'}
                         </button>
                     </div>
-
-                    {!isRegisterMode && (
-                        <div className="lp-presets">
-                            <button
-                                type="button"
-                                className="lp-preset-btn"
-                                onClick={() => usePreset('admin@example.com', 'admin123')}
-                                disabled={isBusy}
-                            >
-                                Admin demo
-                            </button>
-                            <button
-                                type="button"
-                                className="lp-preset-btn"
-                                onClick={() => usePreset('user@example.com', 'user123')}
-                                disabled={isBusy}
-                            >
-                                Guest demo
-                            </button>
-                        </div>
-                    )}
                 </section>
             </main>
         </div>

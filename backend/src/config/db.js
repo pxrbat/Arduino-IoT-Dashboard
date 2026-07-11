@@ -15,26 +15,6 @@ const loadDB = () => {
     const adminPasswordHash = bcrypt.hashSync("admin123", 10);
     const userPasswordHash = bcrypt.hashSync("user123", 10);
     const initialDB = {
-      users: [
-        {
-          _id: "admin_id_123",
-          name: "System Admin",
-          email: "admin@example.com",
-          password: adminPasswordHash,
-          role: "admin",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-        {
-          _id: "user_id_123",
-          name: "Guest Operator",
-          email: "user@example.com",
-          password: userPasswordHash,
-          role: "user",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      ],
       sensordatas: [],
       thresholdconfigs: [],
     };
@@ -187,37 +167,6 @@ const setupFallback = () => {
     saveDB(data);
     return newConfig;
   };
-};
-
-const seedUsers = async () => {
-  try {
-    const adminEmail = "admin@example.com";
-    const userEmail = "user@example.com";
-
-    const adminExists = await User.findOne({ email: adminEmail });
-    if (!adminExists) {
-      await User.create({
-        name: "System Admin",
-        email: adminEmail,
-        password: "admin123",
-        role: "admin",
-      });
-      console.log("Seeded admin@example.com account successfully");
-    }
-
-    const userExists = await User.findOne({ email: userEmail });
-    if (!userExists) {
-      await User.create({
-        name: "Guest Operator",
-        email: userEmail,
-        password: "user123",
-        role: "user",
-      });
-      console.log("Seeded user@example.com account successfully");
-    }
-  } catch (err) {
-    console.error("Error seeding users:", err);
-  }
 };
 
 const connectDB = async () => {
