@@ -1,13 +1,12 @@
 const connectDB = require("./config/db.js");
-const { app } = require("./app.js");
-const { httpServer } = require("./app.js");
+const { app, httpServer } = require("./app.js");
 const dotenv = require("dotenv");
 
 dotenv.config({
     path: "./.env",
 });
 
-const { app, httpServer } = require("./app.js");
+const PORT = process.env.PORT || 5000;
 
 const RunServer = async () => {
     try {

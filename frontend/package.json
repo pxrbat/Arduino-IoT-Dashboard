@@ -39,5 +39,8 @@
     "tailwindcss": "^4.3.2",
     "tailwindcss-animate": "^1.0.7",
     "vite": "^8.0.12"
+  },
+  "allowScripts": {
+    "ws@0.4.31": true
   }
 }

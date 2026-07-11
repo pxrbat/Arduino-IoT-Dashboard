@@ -48,6 +48,9 @@ app.use(express.text({ type: 'text/*' }));
 
 
 
+// Auth Routes
+app.use("/api/auth", require("./routes/authRoutes"));
+
 // Sensor Routes
 app.use("/api/sensor", require("./routes/SensorRoutes"));
 

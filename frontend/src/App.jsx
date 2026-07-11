@@ -14,14 +14,11 @@ const API_END_POINT = 'http://localhost:5000/api/sensor/data';
 const SOCKET_URL = 'http://localhost:5000';
 const SESSION_STORAGE_KEY = 'iot-dashboard-session';
 
-const DEMO_USERS = {
-  'admin@iot.local': { password: 'admin123', name: 'System Admin', role: 'admin' },
-  'user@iot.local': { password: 'user123', name: 'Guest Operator', role: 'user' },
-};
 
 export default function App() {
   const [session, setSession] = useState(null);
   const [loginError, setLoginError] = useState('');
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [dataLogs, setDataLogs] = useState([]);
   const [errorSyncing, setErrorSyncing] = useState(false);
   const [isLive, setIsLive] = useState(false);
@@ -110,20 +107,49 @@ export default function App() {
     return () => clearInterval(runtimeInterval);
   }, [fetchSensorLogs, session]);
 
-  const handleLogin = (email, password) => {
-    const normalizedEmail = email.trim().toLowerCase();
-    const account = DEMO_USERS[normalizedEmail];
-
-    if (!account || account.password !== password) {
-      setLoginError('Invalid credentials. Try admin@iot.local / admin123 or user@iot.local / user123.');
+  const handleLogin = async (email, password) => {
+    setIsAuthLoading(true);
+    setLoginError('');
+    try {
+      const response = await axios.post('http://localhost:5000/api/auth/login', {
+        email,
+        password,
+      });
+      const { token, name, role } = response.data;
+      const nextSession = { email, name, role, token };
+      setSession(nextSession);
+      window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(nextSession));
+      setIsAuthLoading(false);
+      return true;
+    } catch (err) {
+      const message = err.response?.data?.message || 'Failed to authenticate. Please check your credentials and try again.';
+      setLoginError(message);
+      setIsAuthLoading(false);
       return false;
     }
+  };
 
-    const nextSession = { email: normalizedEmail, name: account.name, role: account.role };
-    setSession(nextSession);
+  const handleRegister = async (name, email, password) => {
+    setIsAuthLoading(true);
     setLoginError('');
-    window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(nextSession));
-    return true;
+    try {
+      const response = await axios.post('http://localhost:5000/api/auth/register', {
+        name,
+        email,
+        password,
+      });
+      const { token, role } = response.data;
+      const nextSession = { email, name, role, token };
+      setSession(nextSession);
+      window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(nextSession));
+      setIsAuthLoading(false);
+      return true;
+    } catch (err) {
+      const message = err.response?.data?.message || 'Failed to register account. Please check details and try again.';
+      setLoginError(message);
+      setIsAuthLoading(false);
+      return false;
+    }
   };
 
   const handleLogout = () => {
@@ -136,7 +162,14 @@ export default function App() {
   const newestLog = dataLogs[0] || { temperature: 0, humidity: 0 };
 
   if (!session) {
-    return <LoginPage onLogin={handleLogin} error={loginError} />;
+    return (
+      <LoginPage
+        onLogin={handleLogin}
+        onRegister={handleRegister}
+        error={loginError}
+        loading={isAuthLoading}
+      />
+    );
   }
 
   return (

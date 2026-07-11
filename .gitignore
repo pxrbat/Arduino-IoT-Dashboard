@@ -141,3 +141,4 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+backend/src/config/db_fallback.json

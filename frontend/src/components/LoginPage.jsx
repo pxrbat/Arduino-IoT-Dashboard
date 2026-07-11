@@ -1,6 +1,6 @@
 // src/components/LoginPage.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { LockKeyhole, Sun, Moon, Zap, Eye, EyeOff, Loader2, Activity, Radio, SlidersHorizontal, BarChart3 } from 'lucide-react';
+import { LockKeyhole, Sun, Moon, Zap, Eye, EyeOff, Loader2, Activity, Radio, SlidersHorizontal, BarChart3, User } from 'lucide-react';
 import './LoginPage.css';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -12,13 +12,15 @@ const SYSTEM_STATUS = [
     { label: 'Sensor node', state: 'waiting' },
 ];
 
-export default function LoginPage({ onLogin, error, loading = false }) {
+export default function LoginPage({ onLogin, onRegister, error, loading = false }) {
+    const [isRegisterMode, setIsRegisterMode] = useState(false);
+    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [theme, setTheme] = useState('dark');
-    const [touched, setTouched] = useState({ email: false, password: false });
-    const [fieldErrors, setFieldErrors] = useState({ email: '', password: '' });
+    const [touched, setTouched] = useState({ name: false, email: false, password: false });
+    const [fieldErrors, setFieldErrors] = useState({ name: '', email: '', password: '' });
     const [mounted, setMounted] = useState(false);
 
     const submittingRef = useRef(false);
@@ -45,7 +47,11 @@ export default function LoginPage({ onLogin, error, loading = false }) {
     };
 
     const validate = (values) => {
-        const errors = { email: '', password: '' };
+        const errors = { name: '', email: '', password: '' };
+
+        if (isRegisterMode && !values.name.trim()) {
+            errors.name = 'Full name is required.';
+        }
 
         if (!values.email.trim()) {
             errors.email = 'Email is required.';
@@ -64,28 +70,36 @@ export default function LoginPage({ onLogin, error, loading = false }) {
 
     const handleBlur = (field) => {
         setTouched((prev) => ({ ...prev, [field]: true }));
-        setFieldErrors(validate({ email, password }));
+        setFieldErrors(validate({ name, email, password }));
     };
 
     const handleSubmit = (event) => {
         event.preventDefault();
 
-        const errors = validate({ email, password });
+        const errors = validate({ name, email, password });
         setFieldErrors(errors);
-        setTouched({ email: true, password: true });
+        setTouched({ name: true, email: true, password: true });
 
-        const hasErrors = Boolean(errors.email || errors.password);
+        const hasErrors = Boolean(
+            (isRegisterMode && errors.name) || errors.email || errors.password
+        );
         if (hasErrors || submittingRef.current || loading) return;
 
         submittingRef.current = true;
-        onLogin(email.trim(), password);
+        if (isRegisterMode) {
+            onRegister(name.trim(), email.trim(), password);
+        } else {
+            onLogin(email.trim(), password);
+        }
     };
 
     const usePreset = (presetEmail, presetPassword) => {
+        setIsRegisterMode(false);
         setEmail(presetEmail);
         setPassword(presetPassword);
-        setTouched({ email: false, password: false });
-        setFieldErrors({ email: '', password: '' });
+        setName('');
+        setTouched({ name: false, email: false, password: false });
+        setFieldErrors({ name: '', email: '', password: '' });
     };
 
     const isBusy = loading;
@@ -163,11 +177,40 @@ export default function LoginPage({ onLogin, error, loading = false }) {
                             <LockKeyhole size={12} />
                             Protected session
                         </span>
-                        <h2 className="lp-card-title">Log in</h2>
-                        <p className="lp-card-desc">Use one of the demo accounts below to enter the dashboard.</p>
+                        <h2 className="lp-card-title">{isRegisterMode ? 'Register Account' : 'Log in'}</h2>
+                        <p className="lp-card-desc">
+                            {isRegisterMode
+                                ? 'Create an operator account to access the IoT dashboard.'
+                                : 'Use credentials or one of the demo accounts below to enter.'}
+                        </p>
                     </div>
 
                     <form className="lp-form" onSubmit={handleSubmit} noValidate>
+                        {isRegisterMode && (
+                            <label className="lp-form-label" htmlFor="lp-name">
+                                Full Name
+                                <div className={`lp-field ${touched.name && fieldErrors.name ? 'lp-field--invalid' : ''}`}>
+                                    <input
+                                        id="lp-name"
+                                        type="text"
+                                        value={name}
+                                        onChange={(event) => setName(event.target.value)}
+                                        onBlur={() => handleBlur('name')}
+                                        placeholder="John Doe"
+                                        autoComplete="name"
+                                        aria-invalid={Boolean(touched.name && fieldErrors.name)}
+                                        aria-describedby={fieldErrors.name ? 'lp-name-error' : undefined}
+                                        disabled={isBusy}
+                                    />
+                                </div>
+                                {touched.name && fieldErrors.name && (
+                                    <span className="lp-field-error" id="lp-name-error" role="alert">
+                                        {fieldErrors.name}
+                                    </span>
+                                )}
+                            </label>
+                        )}
+
                         <label className="lp-form-label" htmlFor="lp-email">
                             Email
                             <div className={`lp-field ${touched.email && fieldErrors.email ? 'lp-field--invalid' : ''}`}>
@@ -235,32 +278,50 @@ export default function LoginPage({ onLogin, error, loading = false }) {
                             {isBusy ? (
                                 <>
                                     <Loader2 size={15} className="lp-spinner" aria-hidden="true" />
-                                    Authenticating...
+                                    {isRegisterMode ? 'Registering...' : 'Authenticating...'}
                                 </>
                             ) : (
-                                'Enter dashboard'
+                                isRegisterMode ? 'Register account' : 'Enter dashboard'
                             )}
                         </button>
                     </form>
 
-                    <div className="lp-presets">
+                    <div className="lp-toggle-mode">
+                        {isRegisterMode ? 'Already have an account?' : "Don't have an account?"}
                         <button
                             type="button"
-                            className="lp-preset-btn"
-                            onClick={() => usePreset('admin@iot.local', 'admin123')}
+                            className="lp-toggle-btn"
+                            onClick={() => {
+                                setIsRegisterMode(!isRegisterMode);
+                                setTouched({ name: false, email: false, password: false });
+                                setFieldErrors({ name: '', email: '', password: '' });
+                            }}
                             disabled={isBusy}
                         >
-                            Admin demo
-                        </button>
-                        <button
-                            type="button"
-                            className="lp-preset-btn"
-                            onClick={() => usePreset('user@iot.local', 'user123')}
-                            disabled={isBusy}
-                        >
-                            Guest demo
+                            {isRegisterMode ? 'Log in' : 'Register'}
                         </button>
                     </div>
+
+                    {!isRegisterMode && (
+                        <div className="lp-presets">
+                            <button
+                                type="button"
+                                className="lp-preset-btn"
+                                onClick={() => usePreset('admin@iot.local', 'admin123')}
+                                disabled={isBusy}
+                            >
+                                Admin demo
+                            </button>
+                            <button
+                                type="button"
+                                className="lp-preset-btn"
+                                onClick={() => usePreset('user@iot.local', 'user123')}
+                                disabled={isBusy}
+                            >
+                                Guest demo
+                            </button>
+                        </div>
+                    )}
                 </section>
             </main>
         </div>

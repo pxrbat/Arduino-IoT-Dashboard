@@ -461,3 +461,26 @@
         padding: 20px;
     }
 }
+
+.lp-toggle-mode {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 13.5px;
+    color: var(--text-soft);
+}
+
+.lp-toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--accent);
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0 4px;
+    font-size: 13.5px;
+    transition: color 0.15s ease;
+}
+
+.lp-toggle-btn:hover {
+    color: color-mix(in srgb, var(--accent) 80%, #ffffff);
+    text-decoration: underline;
+}
