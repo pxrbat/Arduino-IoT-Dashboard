@@ -7,13 +7,11 @@ dotenv.config({
     path: "./.env",
 });
 
-const PORT = process.env.PORT;
-const MONGODB_URI = process.env.MONGODB_URI;
+const { app, httpServer } = require("./app.js");
 
 const RunServer = async () => {
     try {
-        await connectDB(MONGODB_URI);
-        console.log("MongoDB Connected");
+        await connectDB();
         httpServer.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
         });

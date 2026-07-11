@@ -1,12 +1,20 @@
+/* src/components/DashboardCard.css */
+
 .dc-card {
     display: flex;
     align-items: flex-start;
     gap: 10px;
     background: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: 6px;
-    padding: 12px;
+    border-radius: 8px;
+    padding: 14px;
     color: var(--text);
+    transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.dc-card:hover {
+    border-color: color-mix(in srgb, var(--text) 15%, var(--card-border));
+    transform: translateY(-2px);
 }
 
 .dc-icon {
@@ -16,17 +24,17 @@
     flex-shrink: 0;
     width: 28px;
     height: 28px;
-    border-radius: 5px;
+    border-radius: 6px;
 }
 
 .dc-icon.is-temp {
-    background: #fef2f2;
-    color: #dc2626;
+    background: color-mix(in srgb, var(--danger) 14%, var(--bg-soft));
+    color: var(--danger);
 }
 
 .dc-icon.is-humidity {
-    background: #eff6ff;
-    color: #2563eb;
+    background: color-mix(in srgb, var(--accent) 14%, var(--bg-soft));
+    color: var(--accent);
 }
 
 .dc-body {
@@ -47,10 +55,11 @@
     display: flex;
     align-items: baseline;
     margin-top: 4px;
+    font-family: var(--font-mono);
 }
 
 .dc-value {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 600;
     color: var(--text);
     line-height: 1;
@@ -64,19 +73,19 @@
 
 .dc-status {
     display: inline-flex;
-    margin-top: 6px;
+    margin-top: 8px;
     font-size: 11px;
     font-weight: 600;
-    padding: 1px 6px;
-    border-radius: 3px;
+    padding: 2px 7px;
+    border-radius: 4px;
 }
 
 .dc-status.is-normal {
-    background: #ecfdf5;
-    color: #047857;
+    background: color-mix(in srgb, var(--success) 14%, var(--bg-soft));
+    color: var(--success);
 }
 
 .dc-status.is-alert {
-    background: #fffbeb;
-    color: #b45309;
+    background: color-mix(in srgb, var(--warning) 16%, var(--bg-soft));
+    color: var(--warning);
 }

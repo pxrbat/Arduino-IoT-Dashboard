@@ -1,8 +1,24 @@
 // src/components/layout/DashboardLayout.jsx
 import { useState } from 'react';
-import { Menu, RefreshCw, LogOut, Sun, Moon } from 'lucide-react';
+import { Menu, RefreshCw, LogOut, Sun, Moon, ChevronRight } from 'lucide-react';
 import Sidebar from './Sidebar';
 import './DashboardLayout.css';
+
+const SECTION_LABELS = {
+    overview: 'Overview',
+    telemetry: 'Live Telemetry',
+    logs: 'Data Logs',
+    admin: 'Admin',
+};
+
+function getInitials(name = '') {
+    return name
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase())
+        .join('');
+}
 
 export default function DashboardLayout({
     children,
@@ -20,6 +36,8 @@ export default function DashboardLayout({
 
     return (
         <div className="dl-shell">
+            <div className="dl-accent-line" />
+
             <Sidebar
                 activeSection={activeSection}
                 onNavigate={(id) => {
@@ -43,11 +61,19 @@ export default function DashboardLayout({
                         >
                             <Menu size={17} />
                         </button>
-                        <h1 className="dl-title">IoT Environmental Monitor</h1>
+
+                        <div className="dl-breadcrumb">
+                            <span className="dl-breadcrumb-root">iot-dashboard</span>
+                            <ChevronRight size={13} className="dl-breadcrumb-sep" />
+                            <span className="dl-breadcrumb-current">
+                                {SECTION_LABELS[activeSection] ?? activeSection}
+                            </span>
+                        </div>
                     </div>
 
                     <div className="dl-header-right">
                         <span className={`dl-status-pill ${isLive ? 'is-live' : ''}`}>
+                            <span className="dl-status-dot" />
                             {isLive ? 'Live' : 'Cached'}
                         </span>
 
@@ -57,13 +83,22 @@ export default function DashboardLayout({
                             {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
                         </button>
 
-                        <button type="button" onClick={onRefresh} className="dl-icon-btn" aria-label="Refresh data">
+                        <button
+                            type="button"
+                            onClick={onRefresh}
+                            className="dl-icon-btn dl-refresh-btn"
+                            aria-label="Refresh data"
+                        >
                             <RefreshCw size={15} />
+                            <kbd className="dl-kbd">R</kbd>
                         </button>
 
                         <div className="dl-divider" />
 
-                        <span className="dl-session-name">{session?.name}</span>
+                        <div className="dl-session">
+                            <span className="dl-session-avatar">{getInitials(session?.name) || '?'}</span>
+                            <span className="dl-session-name">{session?.name}</span>
+                        </div>
 
                         <button type="button" onClick={onLogout} className="dl-logout-btn">
                             <LogOut size={13} />

@@ -1,3 +1,4 @@
+// src/App.jsx
 import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import socketIOClient from 'socket.io-client';
@@ -54,15 +55,17 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', newTheme);
   };
 
+  // Pulls the latest persisted readings from the REST API. Falls back to
+  // locally-generated mock data only if the request actually fails, so the
+  // UI keeps working during backend downtime without masking real errors.
   const fetchSensorLogs = useCallback(async () => {
     try {
-      socketIOClient(SOCKET_URL).emit('requestSensorData');
-      setDataLogs(response.data);
-      console.log("Fetched sensor logs:", response.data);
+      const response = await axios.get(API_END_POINT);
+      setDataLogs(Array.isArray(response.data) ? response.data.slice(0, 40) : []);
       setErrorSyncing(false);
     } catch (err) {
       setErrorSyncing(true);
-      setDataLogs(currentLogs => {
+      setDataLogs((currentLogs) => {
         const mockupReading = {
           timestamp: new Date().toISOString(),
           temperature: parseFloat((23 + Math.random() * 5).toFixed(1)),
@@ -83,27 +86,17 @@ export default function App() {
 
     const socket = socketIOClient(SOCKET_URL);
 
-    socket.on('connect', () => {
-      console.log("Connected to socket server:", socket.id);
-      setIsLive(true);
-    });
-    socket.on('disconnect', () => {
-      console.log("Disconnected from socket server:", socket.id);
-      setIsLive(false);
-    });
+    socket.on('connect', () => setIsLive(true));
+    socket.on('disconnect', () => setIsLive(false));
     socket.on('newSensorData', (data) => {
-      console.log("Received new sensor data via socket:", data);
       const reading = Array.isArray(data) ? data[0] : data;
-      console.log("Processed reading:", reading);
       if (!reading) return;
       const newLog = {
         timestamp: reading.timestamp || new Date().toISOString(),
         temperature: reading.temperature,
         humidity: reading.humidity,
       };
-      setDataLogs(currentLogs => [newLog, ...currentLogs].slice(0, 40));
-      
-      console.log("Fetched sensor logs:", dataLogs);
+      setDataLogs((currentLogs) => [newLog, ...currentLogs].slice(0, 40));
       setErrorSyncing(false);
     });
 
@@ -113,8 +106,8 @@ export default function App() {
   useEffect(() => {
     if (!session) return undefined;
     fetchSensorLogs();
-     const runtimeInterval = setInterval(fetchSensorLogs, 3000);
-     return () => clearInterval(runtimeInterval);
+    const runtimeInterval = setInterval(fetchSensorLogs, 3000);
+    return () => clearInterval(runtimeInterval);
   }, [fetchSensorLogs, session]);
 
   const handleLogin = (email, password) => {
@@ -161,31 +154,16 @@ export default function App() {
       {activeSection === 'overview' && (
         <>
           <div className="dl-cards-grid">
-            <DashboardCard
-              title="Temperature Level"
-              value={newestLog.temperature}
-              unit="°C"
-              isTemp={true}
-            />
-            <DashboardCard
-              title="Relative Humidity"
-              value={newestLog.humidity}
-              unit="%"
-              isTemp={false}
-            />
+            <DashboardCard title="Temperature" value={newestLog.temperature} unit="°C" isTemp={true} />
+            <DashboardCard title="Relative Humidity" value={newestLog.humidity} unit="%" isTemp={false} />
           </div>
-
           <EnvironmentalChart dataLogs={dataLogs} />
         </>
       )}
 
-      {activeSection === 'telemetry' && (
-        <LiveFeed dataLogs={dataLogs} isLive={isLive} />
-      )}
+      {activeSection === 'telemetry' && <LiveFeed dataLogs={dataLogs} isLive={isLive} />}
 
-      {activeSection === 'logs' && (
-        <DataTable dataLogs={dataLogs} />
-      )}
+      {activeSection === 'logs' && <DataTable dataLogs={dataLogs} />}
 
       {activeSection === 'admin' && session.role === 'admin' && (
         <AdminControls onRefresh={fetchSensorLogs} />

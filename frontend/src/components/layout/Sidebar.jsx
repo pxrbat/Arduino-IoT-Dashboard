@@ -1,3 +1,4 @@
+// src/components/layout/Sidebar.jsx
 import { useState, useEffect } from 'react';
 import {
     LayoutDashboard,
@@ -12,10 +13,10 @@ import {
 import './Sidebar.css';
 
 const NAV_ITEMS = [
-    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'telemetry', label: 'Live Telemetry', icon: Activity },
-    { id: 'logs', label: 'Data Logs', icon: Table2 },
-    { id: 'admin', label: 'Admin', icon: ShieldCheck },
+    { id: 'overview', label: 'Overview', icon: LayoutDashboard, shortcut: '1' },
+    { id: 'telemetry', label: 'Live Telemetry', icon: Activity, shortcut: '2' },
+    { id: 'logs', label: 'Data Logs', icon: Table2, shortcut: '3' },
+    { id: 'admin', label: 'Admin', icon: ShieldCheck, shortcut: '4' },
 ];
 
 function useCollapsedState() {
@@ -44,7 +45,7 @@ export default function Sidebar({
     return (
         <>
             {isMobileOpen && (
-                <div className="sidebar-overlay" onClick={onCloseMobile} aria-hidden="true" />
+                <div className="sidebar-overlay is-visible" onClick={onCloseMobile} aria-hidden="true" />
             )}
 
             <aside className={`sidebar ${isCollapsed ? 'is-collapsed' : ''} ${isMobileOpen ? 'is-mobile-open' : ''}`}>
@@ -76,8 +77,9 @@ export default function Sidebar({
                 </div>
 
                 <nav className="sidebar-nav">
+                    {!isCollapsed && <span className="sidebar-nav-eyebrow">Menu</span>}
                     <ul className="sidebar-nav-list">
-                        {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
+                        {NAV_ITEMS.map(({ id, label, icon: Icon, shortcut }) => {
                             const isActive = activeSection === id;
                             return (
                                 <li key={id}>
@@ -88,7 +90,12 @@ export default function Sidebar({
                                         className={`sidebar-nav-item ${isActive ? 'is-active' : ''}`}
                                     >
                                         <Icon size={15} strokeWidth={1.75} className="sidebar-nav-icon" />
-                                        {!isCollapsed && <span className="sidebar-nav-label">{label}</span>}
+                                        {!isCollapsed && (
+                                            <>
+                                                <span className="sidebar-nav-label">{label}</span>
+                                                <kbd className="sidebar-nav-kbd">{shortcut}</kbd>
+                                            </>
+                                        )}
                                     </button>
                                 </li>
                             );
@@ -97,8 +104,14 @@ export default function Sidebar({
                 </nav>
 
                 <div className="sidebar-footer">
-                    <div className={`sidebar-status ${isCollapsed ? 'is-collapsed' : ''}`}>
-                        <CircleDot size={12} className={`sidebar-status-dot ${isLive ? 'is-live' : ''}`} strokeWidth={2.5} />
+                    <div className={`sidebar-status ${isCollapsed ? 'is-collapsed' : ''} ${isLive ? 'is-live' : ''}`}>
+                        <span className="sidebar-status-dot-wrap">
+                            <CircleDot
+                                size={12}
+                                className={`sidebar-status-dot ${isLive ? 'is-live' : ''}`}
+                                strokeWidth={2.5}
+                            />
+                        </span>
                         {!isCollapsed && <span>{isLive ? 'Connected' : 'Offline'}</span>}
                     </div>
                 </div>

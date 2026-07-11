@@ -1,3 +1,4 @@
+// src/components/dashboard/AdminControls.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
 import { ShieldAlert, Trash2 } from 'lucide-react';
@@ -8,7 +9,6 @@ export default function AdminControls({ onRefresh }) {
 
   const handleUpdateThreshold = () => {
     alert(`Threshold Updated to ${alertThreshold}°C! (Are you sure you want to proceed?)`);
-
   };
 
   const handleClearLogs = async () => {
@@ -24,13 +24,19 @@ export default function AdminControls({ onRefresh }) {
 
   return (
     <div className="ac-panel">
+      <div className="ac-accent-bar" />
+
       <div className="ac-heading-row">
-        <ShieldAlert size={15} className="ac-heading-icon" strokeWidth={1.75} />
-        <h3 className="ac-heading">System Management Panel</h3>
+        <span className="ac-heading-icon-wrap">
+          <ShieldAlert size={14} strokeWidth={2} />
+        </span>
+        <div>
+          <h3 className="ac-heading">System Management Panel</h3>
+          <p className="ac-subtext">
+            Authorized actions: override hardware parameters, system thresholds, or clear persistent log sheets.
+          </p>
+        </div>
       </div>
-      <p className="ac-subtext">
-        Authorized actions: override hardware parameters, system thresholds, or clear persistent log sheets.
-      </p>
 
       <div className="ac-grid">
         <div className="ac-field">

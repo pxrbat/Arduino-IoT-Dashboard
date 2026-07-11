@@ -55,4 +55,3 @@ app.use("/api/sensor", require("./routes/SensorRoutes"));
 
 module.exports = { app, httpServer };
 
-

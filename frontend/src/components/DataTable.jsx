@@ -1,10 +1,19 @@
+// src/components/DataTable.jsx
 import React from 'react';
+import { Table2 } from 'lucide-react';
 import './DataTable.css';
 
 export default function DataTable({ dataLogs }) {
   return (
     <div className="dt-panel">
-      <h3 className='dt-heading'>Incoming Sensed Streams (DHT22)</h3>
+      <div className="dt-header">
+        <h3 className="dt-heading">
+          <Table2 size={13} strokeWidth={2} />
+          Sensor Readings
+        </h3>
+        <span className="dt-count">{dataLogs.length} records</span>
+      </div>
+
       <div className="dt-table-container">
         <table className="dt-table">
           <thead>
@@ -18,19 +27,20 @@ export default function DataTable({ dataLogs }) {
           <tbody>
             {dataLogs.length === 0 ? (
               <tr>
-                <td colSpan="4" className="dt-empty">No packets recorded from Arduino Node MCU yet.</td>
+                <td colSpan="4" className="dt-empty">No readings recorded yet.</td>
               </tr>
             ) : (
               dataLogs.map((log, index) => {
                 const isWarning = log.temperature > 32 || log.humidity > 75;
                 return (
                   <tr key={log._id || index}>
-                    <td>{new Date(log.timestamp).toLocaleString()}</td>
-                    <td>{log.temperature}°C</td>
-                    <td>{log.humidity}%</td>
+                    <td className="dt-cell-time">{new Date(log.timestamp).toLocaleString()}</td>
+                    <td className="dt-cell-num">{log.temperature}°C</td>
+                    <td className="dt-cell-num">{log.humidity}%</td>
                     <td>
                       <span className={`dt-status ${isWarning ? 'is-alert' : 'is-normal'}`}>
-                        {isWarning ? 'Flagged Warning' : 'Optimal'}
+                        <span className="dt-status-dot" />
+                        {isWarning ? 'Flagged' : 'Optimal'}
                       </span>
                     </td>
                   </tr>

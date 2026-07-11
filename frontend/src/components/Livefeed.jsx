@@ -1,4 +1,6 @@
+// src/components/Livefeed.jsx
 import React, { useEffect, useRef, useState } from 'react';
+import { Radio } from 'lucide-react';
 import './Livefeed.css';
 
 function formatTime(iso) {
@@ -16,11 +18,6 @@ function tempTone(temp) {
   return 'warm';
 }
 
-/**
- * Live, event-driven feed of incoming sensor readings.
- * Renders a new row the instant a 'newSensorData' socket event lands
- * (driven by the backend's /api/sensor/emit ingestion, ~every 2s).
- */
 export default function LiveFeed({ dataLogs, isLive }) {
   const [secondsAgo, setSecondsAgo] = useState(0);
   const lastTimestampRef = useRef(null);
@@ -51,7 +48,8 @@ export default function LiveFeed({ dataLogs, isLive }) {
     <section className="live-feed-panel">
       <div className="live-feed-header">
         <div className="live-feed-title">
-          <span>Live Transmission</span>
+          <Radio size={13} strokeWidth={2} />
+          <span>Live Feed</span>
         </div>
         <div className={`live-feed-status ${isLive ? 'is-live' : 'is-offline'}`}>
           <span className="live-feed-dot" />
@@ -61,7 +59,7 @@ export default function LiveFeed({ dataLogs, isLive }) {
 
       <ol className="live-feed-list">
         {recent.length === 0 && (
-          <li className="live-feed-empty">Waiting for the first packet…</li>
+          <li className="live-feed-empty">Waiting for the first reading…</li>
         )}
         {recent.map((log, idx) => (
           <li
