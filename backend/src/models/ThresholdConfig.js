@@ -1,3 +1,4 @@
+// backend/models/ThresholdConfig.js
 const mongoose = require('mongoose');
 
 const ThresholdConfigSchema = new mongoose.Schema(

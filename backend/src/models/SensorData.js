@@ -1,3 +1,4 @@
+// backend/models/SensorData.js
 const mongoose = require('mongoose');
 
 const SensorDataSchema = new mongoose.Schema(
@@ -18,12 +19,11 @@ const SensorDataSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true, 
+    timestamps: true,
     collection: 'sensor_logs',
   }
 );
 
-// Add compound index for efficient time-range queries
 SensorDataSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model('SensorData', SensorDataSchema);

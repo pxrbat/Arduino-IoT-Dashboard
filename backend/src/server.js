@@ -1,13 +1,8 @@
+// backend/server.js
 const connectDB = require("./config/db.js");
-const { app } = require("./app.js");
-const { httpServer } = require("./app.js");
-const dotenv = require("dotenv");
+const { app, httpServer } = require("./app.js"); // app.js already loads dotenv from ../.env
 
-dotenv.config({
-    path: "./.env",
-});
-
-const { app, httpServer } = require("./app.js");
+const PORT = process.env.PORT || 5000;
 
 const RunServer = async () => {
     try {
@@ -23,7 +18,6 @@ const RunServer = async () => {
 RunServer()
     .then(() => {
         console.log("Server started successfully");
-       
     })
     .catch((err) => {
         console.error("Error starting server:", err);
