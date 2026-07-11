@@ -226,7 +226,7 @@ const connectDB = async () => {
       serverSelectionTimeoutMS: 2000, // Quick timeout to fail fast
     });
     console.log("MongoDB Connected");
-    await seedUsers();
+    // await seedUsers();
   } catch (err) {
     console.log(`Failed to connect to MongoDB: ${err.message}`);
     setupFallback();

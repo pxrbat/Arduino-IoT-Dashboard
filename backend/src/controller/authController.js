@@ -34,11 +34,8 @@ const register = async (req, res) => {
       return res.status(400).json({ message: "User already exists with that email." });
     }
 
-    // Auto-assign admin role if email contains 'admin' to facilitate testing admin controls
-    let role = "user";
-    if (email.toLowerCase().includes("admin")) {
-      role = "admin";
-    }
+    const existingUserCount = await User.countDocuments({});
+    const role = existingUserCount === 0 ? "admin" : "user";
 
     const user = await User.create({
       name,
