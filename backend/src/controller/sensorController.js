@@ -1,4 +1,6 @@
+// backend/controller/sensorController.js
 const SensorData = require("../models/SensorData");
+const ThresholdConfig = require("../models/ThresholdConfig");
 const { getIO } = require("../socket.js");
 
 const addSensorData = async (req, res) => {
@@ -32,10 +34,29 @@ const addSensorData = async (req, res) => {
     }
 };
 
+// Returns the most recent readings, newest first. Defaults to 40 to match
+// the frontend's rolling log window; pass ?limit= to override.
 const getSensorData = async (req, res) => {
     try {
-        const data = await SensorData.find();
+        const limit = Math.min(Number(req.query.limit) || 40, 500);
+        const data = await SensorData.find().sort({ createdAt: -1 }).limit(limit);
         res.status(200).json(data);
+    } catch (error) {
+        res.status(500).json({
+            message: error.message,
+        });
+    }
+};
+
+// Wipes all stored sensor readings. Used by the admin "purge logs" action —
+// irreversible, so the frontend is expected to confirm before calling this.
+const clearSensorData = async (req, res) => {
+    try {
+        const result = await SensorData.deleteMany({});
+        res.status(200).json({
+            message: "Sensor logs cleared.",
+            deletedCount: result.deletedCount,
+        });
     } catch (error) {
         res.status(500).json({
             message: error.message,
@@ -47,24 +68,60 @@ const emitSensorData = async (req, res) => {
     try {
         const io = getIO();
         const data = await SensorData.find().sort({ createdAt: -1 }).limit(1);
-        console.log("Emitting sensor data:", data);
         const Data = data.map((log) => ({
             temperature: log.temperature,
             humidity: log.humidity,
             timestamp: log.createdAt,
         }));
-        
+
         if (data.length > 0) {
             io.emit("newSensorData", Data);
-            console.log("Emitted sensor data:", Data);
         }
-        if(res){
-        res.status(200).json({ message: "Sensor data emitted successfully.", data: Data });}
+        if (res) {
+            res.status(200).json({ message: "Sensor data emitted successfully.", data: Data });
+        }
     } catch (error) {
         console.error("Error emitting sensor data:", error);
-        if(res){
-        res.status(500).json({ message: "Error emitting sensor data." });
+        if (res) {
+            res.status(500).json({ message: "Error emitting sensor data." });
+        }
     }
+};
+
+const getThreshold = async (req, res) => {
+    try {
+        const config = await ThresholdConfig.getConfig();
+        res.status(200).json(config);
+    } catch (error) {
+        res.status(500).json({
+            message: error.message,
+        });
+    }
+};
+
+// Partial update — only overwrites fields present in the request body.
+const updateThreshold = async (req, res) => {
+    const { tempThreshold, humidityThreshold, co2Threshold, pm25Threshold } = req.body;
+
+    const updates = {};
+    if (tempThreshold !== undefined) updates.tempThreshold = tempThreshold;
+    if (humidityThreshold !== undefined) updates.humidityThreshold = humidityThreshold;
+    if (co2Threshold !== undefined) updates.co2Threshold = co2Threshold;
+    if (pm25Threshold !== undefined) updates.pm25Threshold = pm25Threshold;
+
+    if (Object.keys(updates).length === 0) {
+        return res.status(400).json({ message: "No valid threshold fields provided." });
+    }
+
+    try {
+        const config = await ThresholdConfig.getConfig();
+        Object.assign(config, updates);
+        await config.save();
+        res.status(200).json(config);
+    } catch (error) {
+        res.status(500).json({
+            message: error.message,
+        });
     }
 };
 
@@ -105,7 +162,10 @@ const calculateAverageHumidity = async () => {
 module.exports = {
     addSensorData,
     getSensorData,
+    clearSensorData,
     calculateAverageTemperature,
     calculateAverageHumidity,
     emitSensorData,
+    getThreshold,
+    updateThreshold,
 };

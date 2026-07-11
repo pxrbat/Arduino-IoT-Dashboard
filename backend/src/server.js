@@ -1,3 +1,4 @@
+// backend/server.js
 const connectDB = require("./config/db.js");
 const { app, httpServer } = require("./app.js");
 const dotenv = require("dotenv");
@@ -22,7 +23,6 @@ const RunServer = async () => {
 RunServer()
     .then(() => {
         console.log("Server started successfully");
-       
     })
     .catch((err) => {
         console.error("Error starting server:", err);
