@@ -19,7 +19,7 @@ const loadDB = () => {
         {
           _id: "admin_id_123",
           name: "System Admin",
-          email: "admin@iot.local",
+          email: "admin@example.com",
           password: adminPasswordHash,
           role: "admin",
           createdAt: new Date().toISOString(),
@@ -28,7 +28,7 @@ const loadDB = () => {
         {
           _id: "user_id_123",
           name: "Guest Operator",
-          email: "user@iot.local",
+          email: "user@example.com",
           password: userPasswordHash,
           role: "user",
           createdAt: new Date().toISOString(),
@@ -191,8 +191,8 @@ const setupFallback = () => {
 
 const seedUsers = async () => {
   try {
-    const adminEmail = "admin@iot.local";
-    const userEmail = "user@iot.local";
+    const adminEmail = "admin@example.com";
+    const userEmail = "user@example.com";
 
     const adminExists = await User.findOne({ email: adminEmail });
     if (!adminExists) {
@@ -202,7 +202,7 @@ const seedUsers = async () => {
         password: "admin123",
         role: "admin",
       });
-      console.log("Seeded admin@iot.local account successfully");
+      console.log("Seeded admin@example.com account successfully");
     }
 
     const userExists = await User.findOne({ email: userEmail });
@@ -213,7 +213,7 @@ const seedUsers = async () => {
         password: "user123",
         role: "user",
       });
-      console.log("Seeded user@iot.local account successfully");
+      console.log("Seeded user@example.com account successfully");
     }
   } catch (err) {
     console.error("Error seeding users:", err);

@@ -196,7 +196,7 @@ export default function LoginPage({ onLogin, onRegister, error, loading = false 
                                         value={name}
                                         onChange={(event) => setName(event.target.value)}
                                         onBlur={() => handleBlur('name')}
-                                        placeholder="John Doe"
+                                        placeholder=""
                                         autoComplete="name"
                                         aria-invalid={Boolean(touched.name && fieldErrors.name)}
                                         aria-describedby={fieldErrors.name ? 'lp-name-error' : undefined}
@@ -220,7 +220,7 @@ export default function LoginPage({ onLogin, onRegister, error, loading = false 
                                     value={email}
                                     onChange={(event) => setEmail(event.target.value)}
                                     onBlur={() => handleBlur('email')}
-                                    placeholder="name@company.com"
+                                    placeholder=""
                                     autoComplete="username"
                                     aria-invalid={Boolean(touched.email && fieldErrors.email)}
                                     aria-describedby={fieldErrors.email ? 'lp-email-error' : undefined}
@@ -243,7 +243,7 @@ export default function LoginPage({ onLogin, onRegister, error, loading = false 
                                     value={password}
                                     onChange={(event) => setPassword(event.target.value)}
                                     onBlur={() => handleBlur('password')}
-                                    placeholder="Enter password"
+                                    placeholder=""
                                     autoComplete="current-password"
                                     aria-invalid={Boolean(touched.password && fieldErrors.password)}
                                     aria-describedby={fieldErrors.password ? 'lp-password-error' : undefined}
@@ -307,7 +307,7 @@ export default function LoginPage({ onLogin, onRegister, error, loading = false 
                             <button
                                 type="button"
                                 className="lp-preset-btn"
-                                onClick={() => usePreset('admin@iot.local', 'admin123')}
+                                onClick={() => usePreset('admin@example.com', 'admin123')}
                                 disabled={isBusy}
                             >
                                 Admin demo
@@ -315,7 +315,7 @@ export default function LoginPage({ onLogin, onRegister, error, loading = false 
                             <button
                                 type="button"
                                 className="lp-preset-btn"
-                                onClick={() => usePreset('user@iot.local', 'user123')}
+                                onClick={() => usePreset('user@example.com', 'user123')}
                                 disabled={isBusy}
                             >
                                 Guest demo
