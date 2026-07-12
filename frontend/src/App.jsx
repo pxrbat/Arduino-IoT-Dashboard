@@ -10,6 +10,7 @@ import AdminControls from './components/AdminControls';
 import LiveFeed from './components/Livefeed';
 import LoginPage from './components/LoginPage';
 import ManageUsers from './components/ManageUsers';
+import WelcomeBanner from './components/WelcomeBanner';
 
 const API_END_POINT = 'http://localhost:5000/api/sensor/data';
 const SOCKET_URL = 'http://localhost:5000';
@@ -194,11 +195,13 @@ export default function App() {
     >
       {activeSection === 'overview' && (
         <>
+          <WelcomeBanner name={session.name} role={session.role} isLive={isLive} />
           <div className="dl-cards-grid">
             <DashboardCard title="Temperature" value={newestLog.temperature} unit="°C" isTemp={true} />
             <DashboardCard title="Relative Humidity" value={newestLog.humidity} unit="%" isTemp={false} />
           </div>
           <EnvironmentalChart dataLogs={dataLogs} />
+          
         </>
       )}
 
