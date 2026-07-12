@@ -212,7 +212,7 @@ export default function App() {
       {activeSection === 'users' && session.role === 'admin' && (<ManageUsers session={session} />)}
 
       {activeSection === 'admin' && session.role === 'admin' && (
-        <AdminControls onRefresh={fetchSensorLogs} />
+        <AdminControls session={session} onRefresh={fetchSensorLogs} />
       )}
     </DashboardLayout>
   );

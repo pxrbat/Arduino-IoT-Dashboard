@@ -4,8 +4,30 @@ import axios from 'axios';
 import { ShieldAlert, Trash2 } from 'lucide-react';
 import './AdminControls.css';
 
-export default function AdminControls({ onRefresh }) {
+export default function AdminControls({session, onRefresh }) {
   const [alertThreshold, setAlertThreshold] = useState(32);
+
+  const authHeaders = {
+    headers: { Authorization: `Bearer ${session.token}` },
+  };
+
+  // used to be after the return statement so it was a dead code block, moved it up here so it actually runs and fetches the threshold from the backend
+
+  useEffect(() => {
+    const loadThreshold = async () => {
+        try {
+            const response = await axios.get(
+                "http://localhost:5000/api/sensor/threshold"
+            );
+
+            setAlertThreshold(response.data.tempThreshold);
+        } catch (err) {
+            console.error("Failed to load threshold:", err);
+        }
+    };
+
+    loadThreshold();
+  }, []);
 
   const handleUpdateThreshold = async () => {
     try {
@@ -13,7 +35,8 @@ export default function AdminControls({ onRefresh }) {
             "http://localhost:5000/api/sensor/threshold",
             {
                 tempThreshold: Number(alertThreshold),
-            }
+            },
+            authHeaders
         );
 
         setAlertThreshold(response.data.tempThreshold);
@@ -21,17 +44,22 @@ export default function AdminControls({ onRefresh }) {
         alert("Threshold updated successfully!");
     } catch (err) {
         console.error(err);
-        alert("Failed to update threshold.");
+        alert(err.response?.data?.message || "Failed to update threshold.");
     }
 };
 
   const handleClearLogs = async () => {
     if (window.confirm("Are you sure you want to wipe out historical telemetry database logs?")) {
       try {
-        alert("Database purged successfully.");
+        const response = await axios.delete(
+        "http://localhost:5000/api/sensor/data",
+        authHeaders
+      );
+        alert(`Database purged successfully. ${response.data.deletedCount} records removed.`);
         onRefresh();
       } catch (err) {
-        alert("Simulated database cache cleared successfully!");
+        console.error(err);
+      alert(err.response?.data?.message || "Failed to purge logs.");
       }
     }
   };
@@ -75,19 +103,5 @@ export default function AdminControls({ onRefresh }) {
       </div>
     </div>
   );
-  useEffect(() => {
-    const loadThreshold = async () => {
-        try {
-            const response = await axios.get(
-                "http://localhost:5000/api/sensor/threshold"
-            );
-
-            setAlertThreshold(response.data.tempThreshold);
-        } catch (err) {
-            console.error("Failed to load threshold:", err);
-        }
-    };
-
-    loadThreshold();
-}, []);
+  
 }
