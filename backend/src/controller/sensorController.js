@@ -101,11 +101,12 @@ const getThreshold = async (req, res) => {
 
 // Partial update — only overwrites fields present in the request body.
 const updateThreshold = async (req, res) => {
-    const { tempThreshold, humidityThreshold, co2Threshold, pm25Threshold } = req.body;
+    const { tempThreshold, humidityThreshold, humidityThresholdHigh, co2Threshold, pm25Threshold } = req.body;
 
     const updates = {};
     if (tempThreshold !== undefined) updates.tempThreshold = tempThreshold;
     if (humidityThreshold !== undefined) updates.humidityThreshold = humidityThreshold;
+    if (humidityThresholdHigh !== undefined) updates.humidityThresholdHigh = humidityThresholdHigh;
     if (co2Threshold !== undefined) updates.co2Threshold = co2Threshold;
     if (pm25Threshold !== undefined) updates.pm25Threshold = pm25Threshold;
 

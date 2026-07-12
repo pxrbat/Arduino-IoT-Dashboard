@@ -13,6 +13,11 @@ const ThresholdConfigSchema = new mongoose.Schema(
       default: 40.0,
       description: 'Humidity threshold in percentage below which mist maker runs',
     },
+    humidityThresholdHigh: {
+      type: Number,
+      default: 75.0,
+      description: 'Humidity threshold in percentage above which a high-humidity alert fires',
+    },
     co2Threshold: {
       type: Number,
       default: 1000.0,

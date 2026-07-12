@@ -3,7 +3,7 @@ import React from 'react';
 import { Table2 } from 'lucide-react';
 import './DataTable.css';
 
-export default function DataTable({ dataLogs }) {
+export default function DataTable({ dataLogs, tempThreshold = 32, humidityLow, humidityHigh = 75 }) {
   return (
     <div className="dt-panel">
       <div className="dt-header">
@@ -31,7 +31,10 @@ export default function DataTable({ dataLogs }) {
               </tr>
             ) : (
               dataLogs.map((log, index) => {
-                const isWarning = log.temperature > 32 || log.humidity > 75;
+                const isWarning =
+  log.temperature > tempThreshold ||
+  log.humidity > humidityHigh ||
+  (humidityLow !== undefined && log.humidity < humidityLow);
                 return (
                   <tr key={log._id || index}>
                     <td className="dt-cell-time">{new Date(log.timestamp).toLocaleString()}</td>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { AlertTriangle, Thermometer, Droplets, Wind, CloudHaze } from 'lucide-react';
+import { AlertTriangle, Thermometer, Droplets, Wind, CloudFog } from 'lucide-react';
 
 /**
  * WarningBanner — renders animated alert banners when sensor values
@@ -37,6 +37,13 @@ export default function WarningBanner({ warnings = {}, currentValues = {}, thres
       new Notification('Low Humidity Alert', {
         body: `Humidity is ${currentValues.humidity}% — below ${thresholds.humidityThreshold}% limit. Mist maker activated.`,
         tag: 'humidity-warning',
+      });
+    }
+
+    if (warnings.humidityHigh && !prev.humidityHigh) {
+      new Notification('High Humidity Alert', {
+        body: `Humidity is ${currentValues.humidity}% — exceeds ${thresholds.humidityThresholdHigh}% limit.`,
+        tag: 'humidity-high-warning',
       });
     }
 
@@ -79,6 +86,16 @@ export default function WarningBanner({ warnings = {}, currentValues = {}, thres
     });
   }
 
+  if (warnings.humidityHigh) {
+    activeWarnings.push({
+      key: 'humidity-high',
+      icon: Droplets,
+      severity: 'warning',
+      title: 'HIGH HUMIDITY',
+      detail: `${currentValues.humidity}% exceeds ${thresholds.humidityThresholdHigh}% — High Humidity Alert`,
+    });
+  }
+
   if (warnings.co2High) {
     activeWarnings.push({
       key: 'co2',
@@ -92,7 +109,7 @@ export default function WarningBanner({ warnings = {}, currentValues = {}, thres
   if (warnings.pm25High) {
     activeWarnings.push({
       key: 'pm25',
-      icon: CloudHaze,
+      icon: CloudFog,
       severity: 'warning',
       title: 'HIGH PM2.5 LEVEL',
       detail: `${currentValues.pm25} µg/m³ exceeds ${thresholds.pm25Threshold} µg/m³ safe limit`,

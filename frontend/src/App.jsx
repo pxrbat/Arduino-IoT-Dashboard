@@ -11,11 +11,21 @@ import LiveFeed from './components/Livefeed';
 import LoginPage from './components/LoginPage';
 import ManageUsers from './components/ManageUsers';
 import WelcomeBanner from './components/WelcomeBanner';
+import WarningBanner from './components/WarningBanner';
+import './components/WarningBanner.css';
 
 const API_END_POINT = 'http://localhost:5000/api/sensor/data';
+const THRESHOLD_ENDPOINT = 'http://localhost:5000/api/sensor/threshold';
 const SOCKET_URL = 'http://localhost:5000';
 const SESSION_STORAGE_KEY = 'iot-dashboard-session';
 
+const DEFAULT_THRESHOLDS = {
+  tempThreshold: 32,
+  humidityThreshold: 40,
+  humidityThresholdHigh: 75,
+  co2Threshold: 1000,
+  pm25Threshold: 35,
+};
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -26,6 +36,7 @@ export default function App() {
   const [isLive, setIsLive] = useState(false);
   const [theme, setTheme] = useState('dark');
   const [activeSection, setActiveSection] = useState('overview');
+  const [thresholds, setThresholds] = useState(DEFAULT_THRESHOLDS);
 
   useEffect(() => {
     const savedSession = window.localStorage.getItem(SESSION_STORAGE_KEY);
@@ -54,21 +65,18 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', newTheme);
   };
 
-  // Pulls the latest persisted readings from the REST API. Falls back to
-  // locally-generated mock data only if the request actually fails, so the
-  // UI keeps working during backend downtime without masking real errors.
   const fetchSensorLogs = useCallback(async () => {
     try {
       const response = await axios.get(API_END_POINT);
       setDataLogs(
-  Array.isArray(response.data)
-    ? response.data.slice(0, 40).map(log => ({
-        timestamp: log.createdAt,
-        temperature: log.temperature,
-        humidity: log.humidity,
-      }))
-    : []
-);
+        Array.isArray(response.data)
+          ? response.data.slice(0, 40).map(log => ({
+              timestamp: log.createdAt,
+              temperature: log.temperature,
+              humidity: log.humidity,
+            }))
+          : []
+      );
     } catch (err) {
       setErrorSyncing(true);
       setDataLogs((currentLogs) => {
@@ -79,6 +87,15 @@ export default function App() {
         };
         return [mockupReading, ...currentLogs].slice(0, 40);
       });
+    }
+  }, []);
+
+  const fetchThresholds = useCallback(async () => {
+    try {
+      const response = await axios.get(THRESHOLD_ENDPOINT);
+      setThresholds(response.data);
+    } catch (err) {
+      console.error('Failed to load thresholds:', err);
     }
   }, []);
 
@@ -112,9 +129,10 @@ export default function App() {
   useEffect(() => {
     if (!session) return undefined;
     fetchSensorLogs();
+    fetchThresholds();
     const runtimeInterval = setInterval(fetchSensorLogs, 3000);
     return () => clearInterval(runtimeInterval);
-  }, [fetchSensorLogs, session]);
+  }, [fetchSensorLogs, fetchThresholds, session]);
 
   const handleLogin = async (email, password) => {
     setIsAuthLoading(true);
@@ -170,6 +188,12 @@ export default function App() {
 
   const newestLog = dataLogs[0] || { temperature: 0, humidity: 0 };
 
+  const warnings = {
+    tempHigh: newestLog.temperature > thresholds.tempThreshold,
+    humidityLow: newestLog.humidity < thresholds.humidityThreshold,
+    humidityHigh: newestLog.humidity > thresholds.humidityThresholdHigh,
+  };
+
   if (!session) {
     return (
       <LoginPage
@@ -193,26 +217,38 @@ export default function App() {
       onRefresh={fetchSensorLogs}
       onLogout={handleLogout}
     >
+      <WarningBanner
+        warnings={warnings}
+        currentValues={{ temperature: newestLog.temperature, humidity: newestLog.humidity }}
+        thresholds={thresholds}
+      />
+
       {activeSection === 'overview' && (
         <>
           <WelcomeBanner name={session.name} role={session.role} isLive={isLive} />
           <div className="dl-cards-grid">
-            <DashboardCard title="Temperature" value={newestLog.temperature} unit="°C" isTemp={true} />
-            <DashboardCard title="Relative Humidity" value={newestLog.humidity} unit="%" isTemp={false} />
+            <DashboardCard title="Temperature" value={newestLog.temperature} unit="°C" isTemp={true} highThreshold={thresholds.tempThreshold} />
+            <DashboardCard title="Relative Humidity" value={newestLog.humidity} unit="%" isTemp={false} lowThreshold={thresholds.humidityThreshold} highThreshold={thresholds.humidityThresholdHigh} />
           </div>
           <EnvironmentalChart dataLogs={dataLogs} />
-          
         </>
       )}
 
       {activeSection === 'telemetry' && <LiveFeed dataLogs={dataLogs} isLive={isLive} />}
 
-      {activeSection === 'logs' && <DataTable dataLogs={dataLogs} />}
+      {activeSection === 'logs' && (
+        <DataTable
+          dataLogs={dataLogs}
+          tempThreshold={thresholds.tempThreshold}
+          humidityLow={thresholds.humidityThreshold}
+          humidityHigh={thresholds.humidityThresholdHigh}
+        />
+      )}
 
       {activeSection === 'users' && session.role === 'admin' && (<ManageUsers session={session} />)}
 
       {activeSection === 'admin' && session.role === 'admin' && (
-        <AdminControls session={session} onRefresh={fetchSensorLogs} />
+        <AdminControls session={session} onRefresh={fetchSensorLogs} onThresholdUpdate={fetchThresholds} />
       )}
     </DashboardLayout>
   );
