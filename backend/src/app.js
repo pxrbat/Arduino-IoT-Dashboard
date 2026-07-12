@@ -34,4 +34,6 @@ app.use("/api/sensor", require("./routes/SensorRoutes"));
 
 app.use("/api/users", require("./routes/userRoutes"));
 
+app.use("/api/stats", require("./routes/statsRoutes"));
+
 module.exports = { app, httpServer };

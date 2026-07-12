@@ -13,6 +13,7 @@ import ManageUsers from './components/ManageUsers';
 import WelcomeBanner from './components/WelcomeBanner';
 import WarningBanner from './components/WarningBanner';
 import './components/WarningBanner.css';
+import DashboardStats from './components/DashboardStats';
 
 const API_END_POINT = 'http://localhost:5000/api/sensor/data';
 const THRESHOLD_ENDPOINT = 'http://localhost:5000/api/sensor/threshold';
@@ -226,6 +227,7 @@ export default function App() {
       {activeSection === 'overview' && (
         <>
           <WelcomeBanner name={session.name} role={session.role} isLive={isLive} />
+          {session.role === 'admin' && <DashboardStats session={session} />}
           <div className="dl-cards-grid">
             <DashboardCard title="Temperature" value={newestLog.temperature} unit="°C" isTemp={true} highThreshold={thresholds.tempThreshold} />
             <DashboardCard title="Relative Humidity" value={newestLog.humidity} unit="%" isTemp={false} lowThreshold={thresholds.humidityThreshold} highThreshold={thresholds.humidityThresholdHigh} />
