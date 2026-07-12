@@ -10,6 +10,7 @@ import {
     X,
     CircleDot,
     UserCog,
+    User as UserIcon,
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -17,18 +18,19 @@ const NAV_ITEMS = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard, shortcut: '1' },
     { id: 'telemetry', label: 'Live Telemetry', icon: Activity, shortcut: '2' },
     { id: 'logs', label: 'Data Logs', icon: Table2, shortcut: '3' },
+    { id: 'profile', label: 'My Profile', icon: UserIcon, shortcut: '4' },
     {
         id: 'users',
         label: 'Manage Users',
         icon: UserCog,
-        shortcut: '4',
+        shortcut: '5',
         adminOnly: true
     },
     {
         id: 'admin',
         label: 'Admin',
         icon: ShieldCheck,
-        shortcut: '5',       
+        shortcut: '6',       
         adminOnly: true       
     },
 ];

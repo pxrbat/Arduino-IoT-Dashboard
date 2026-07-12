@@ -50,6 +50,7 @@ const register = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        avatarColor: user.avatarColor,
         token: generateToken(user._id),
       });
     } else {
@@ -75,12 +76,13 @@ const login = async (req, res) => {
 
     if (user && (await user.matchPassword(password))) {
       res.status(200).json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        token: generateToken(user._id),
-      });
+  _id: user._id,
+  name: user.name,
+  email: user.email,
+  role: user.role,
+  avatarColor: user.avatarColor,
+  token: generateToken(user._id),
+});
     } else {
       res.status(401).json({ message: "Invalid email or password." });
     }
@@ -89,7 +91,81 @@ const login = async (req, res) => {
   }
 };
 
+// @desc    Update the logged-in user's own profile
+// @route   PUT /api/auth/profile
+// @access  Private
+const updateProfile = async (req, res) => {
+  try {
+    const { name, email, avatarColor } = req.body;
+
+    if (!name || !email) {
+      return res.status(400).json({ message: "Name and email are required." });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Please enter a valid email." });
+    }
+
+    const emailTaken = await User.findOne({
+      email: email.toLowerCase(),
+      _id: { $ne: req.user._id },
+    });
+    if (emailTaken) {
+      return res.status(400).json({ message: "That email is already in use." });
+    }
+
+    const user = await User.findById(req.user._id);
+    user.name = name;
+    user.email = email.toLowerCase();
+    if (avatarColor) user.avatarColor = avatarColor;
+    await user.save();
+
+    res.status(200).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatarColor: user.avatarColor,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Change the logged-in user's own password
+// @route   PUT /api/auth/password
+// @access  Private
+const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Please enter your current and new password." });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: "New password must be at least 6 characters." });
+    }
+
+    const user = await User.findById(req.user._id);
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Current password is incorrect." });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({ message: "Password updated successfully." });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   register,
   login,
+  updateProfile,
+  changePassword,
 };

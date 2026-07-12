@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Menu, RefreshCw, LogOut, Sun, Moon, ChevronRight } from 'lucide-react';
 import Sidebar from './Sidebar';
 import './DashboardLayout.css';
+import Avatar from '../Avatar';
 
 const SECTION_LABELS = {
     overview: 'Overview',
@@ -98,7 +99,13 @@ export default function DashboardLayout({
                         <div className="dl-divider" />
 
                         <div className="dl-session">
-                            <span className="dl-session-avatar">{getInitials(session?.name) || '?'}</span>
+                            <span className="dl-session-avatar">
+                                <Avatar 
+                                    name={session?.name}
+                                    color={session?.avatarColor}
+                                    size={24}
+                                />
+                            </span>
                             <span className="dl-session-name">{session?.name}</span>
                         </div>
 

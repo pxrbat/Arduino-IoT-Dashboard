@@ -29,6 +29,10 @@ const UserSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user",
     },
+    avatarColor: {
+      type: String,
+      default: "#2563eb",
+    },
   },
   {
     timestamps: true,
@@ -36,7 +40,7 @@ const UserSchema = new mongoose.Schema(
 );
 
 // Encrypt password using bcryptjs before saving
-UserSchema.pre("save", async function (next) {
+UserSchema.pre("save", async function () {
   if (!this.isModified("password")) {
     return;
   }

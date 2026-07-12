@@ -14,6 +14,7 @@ import WelcomeBanner from './components/WelcomeBanner';
 import WarningBanner from './components/WarningBanner';
 import './components/WarningBanner.css';
 import DashboardStats from './components/DashboardStats';
+import ProfilePage from './components/ProfilePage';
 
 const API_END_POINT = 'http://localhost:5000/api/sensor/data';
 const THRESHOLD_ENDPOINT = 'http://localhost:5000/api/sensor/threshold';
@@ -143,8 +144,8 @@ export default function App() {
         email,
         password,
       });
-      const { _id, token, name, role } = response.data;
-      const nextSession = { _id, email, name, role, token };
+      const { _id, token, name, role, avatarColor, } = response.data;
+      const nextSession = { _id, email, name, role, avatarColor, token };
       setSession(nextSession);
       window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(nextSession));
       setIsAuthLoading(false);
@@ -166,8 +167,8 @@ export default function App() {
         email,
         password,
       });
-      const { _id, token, role } = response.data;
-      const nextSession = { _id, email, name, role, token };
+      const { _id, token, role, avatarColor } = response.data;
+      const nextSession = { _id, email, name, role, avatarColor, token };
       setSession(nextSession);
       window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(nextSession));
       setIsAuthLoading(false);
@@ -186,6 +187,14 @@ export default function App() {
     setDataLogs([]);
     setLoginError('');
   };
+
+  const handleSessionUpdate = (updatedFields) => {
+  setSession((current) => {
+    const nextSession = { ...current, ...updatedFields };
+    window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(nextSession));
+    return nextSession;
+  });
+};
 
   const newestLog = dataLogs[0] || { temperature: 0, humidity: 0 };
 
@@ -252,6 +261,10 @@ export default function App() {
       {activeSection === 'admin' && session.role === 'admin' && (
         <AdminControls session={session} onRefresh={fetchSensorLogs} onThresholdUpdate={fetchThresholds} />
       )}
+
+      {activeSection === 'profile' && (
+  <ProfilePage session={session} onSessionUpdate={handleSessionUpdate} />
+)}
     </DashboardLayout>
   );
 }
