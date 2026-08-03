@@ -3,9 +3,6 @@ const User = require("../models/User");
 
 const JWT_SECRET = process.env.JWT_SECRET || "temp_jwt_secret_key";
 
-// Verifies the JWT sent in the Authorization header and attaches the
-// matching user to req.user. Any route wrapped with this becomes
-// "must be logged in" instead of relying on the frontend to hide things.
 const protect = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -30,7 +27,6 @@ const protect = async (req, res, next) => {
   }
 };
 
-// Must run AFTER protect — assumes req.user is already set.
 const adminOnly = (req, res, next) => {
   if (req.user && req.user.role === "admin") {
     return next();

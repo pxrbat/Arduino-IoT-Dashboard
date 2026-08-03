@@ -9,9 +9,6 @@ const generateToken = (id) => {
   });
 };
 
-// @desc    Register a new user
-// @route   POST /api/auth/register
-// @access  Public
 const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -61,9 +58,6 @@ const register = async (req, res) => {
   }
 };
 
-// @desc    Authenticate user & get token
-// @route   POST /api/auth/login
-// @access  Public
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -76,12 +70,12 @@ const login = async (req, res) => {
 
     if (user && (await user.matchPassword(password))) {
       res.status(200).json({
-  _id: user._id,
-  name: user.name,
-  email: user.email,
-  role: user.role,
-  avatarColor: user.avatarColor,
-  token: generateToken(user._id),
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        avatarColor: user.avatarColor,
+        token: generateToken(user._id),
 });
     } else {
       res.status(401).json({ message: "Invalid email or password." });
@@ -91,9 +85,6 @@ const login = async (req, res) => {
   }
 };
 
-// @desc    Update the logged-in user's own profile
-// @route   PUT /api/auth/profile
-// @access  Private
 const updateProfile = async (req, res) => {
   try {
     const { name, email, avatarColor } = req.body;
@@ -133,9 +124,6 @@ const updateProfile = async (req, res) => {
   }
 };
 
-// @desc    Change the logged-in user's own password
-// @route   PUT /api/auth/password
-// @access  Private
 const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;

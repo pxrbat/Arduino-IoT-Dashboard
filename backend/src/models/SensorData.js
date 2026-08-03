@@ -1,4 +1,3 @@
-// backend/models/SensorData.js
 const mongoose = require('mongoose');
 
 const SensorDataSchema = new mongoose.Schema(

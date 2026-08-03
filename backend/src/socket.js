@@ -1,4 +1,3 @@
-// backend/socket.js
 const { Server } = require("socket.io");
 
 let io = null;
@@ -19,6 +18,18 @@ const initSocket = (httpServer) => {
 
   io.on("connection", (socket) => {
     console.log("A client connected:", socket.id);
+    socket.on("mistControl", (data) => {
+      console.log("Mist command received:", data);
+      const esp32 = global.esp32Socket();
+      if(esp32){
+        esp32.send(JSON.stringify(data));
+        console.log("Mist command sent to ESP32:", data);
+      }
+      else{
+        console.log("ESP32 is not connected. Cannot send mist command.");
+      }
+      io.emit("mistCommand", data);
+    });
     socket.on("disconnect", () => {
       console.log("Client disconnected:", socket.id);
     });
@@ -31,10 +42,6 @@ const initSocket = (httpServer) => {
   return io;
 };
 
-// Callers assume sockets are already initialized (app.js does this once at
-// startup, before any request can reach a route handler). If this ever
-// fires, initialization order is broken somewhere — fail loudly rather
-// than silently constructing a second, misconfigured server.
 const getIO = () => {
   if (!io) {
     throw new Error("Socket.IO has not been initialized yet. Call initSocket(httpServer) first.");

@@ -4,10 +4,11 @@ import axios from 'axios';
 import { ShieldAlert, Trash2 } from 'lucide-react';
 import './AdminControls.css';
 
-export default function AdminControls({ session, onRefresh, onThresholdUpdate }) {
+export default function AdminControls({ session, socket, onRefresh, onThresholdUpdate }) {
   const [tempThreshold, setTempThreshold] = useState(32);
   const [humidityLow, setHumidityLow] = useState(40);
   const [humidityHigh, setHumidityHigh] = useState(75);
+  const [mistState, setMistState] = useState(false);
 
   const authHeaders = {
     headers: { Authorization: `Bearer ${session.token}` },
@@ -30,6 +31,18 @@ export default function AdminControls({ session, onRefresh, onThresholdUpdate })
 
     loadThresholds();
   }, []);
+
+  const handleMistControl = () => {
+
+  const newState = !mistState;
+
+  setMistState(newState);
+
+  socket.emit("mistControl", {
+    state: newState
+  });
+
+};
 
   const handleUpdateThresholds = async () => {
     try {
@@ -89,6 +102,10 @@ export default function AdminControls({ session, onRefresh, onThresholdUpdate })
       </div>
 
       <div className="ac-grid">
+        <div className="ac-field ac-field-align-end">
+          <label className="ac-label">Mist Maker Control</label>
+          <button className="ac-btn-primary" onClick={handleMistControl}> {mistState ? "Turn OFF Mist" : "Turn ON Mist"}</button>
+          </div>
         <div className="ac-field">
           <label className="ac-label">Temperature Limit Sensor Warning (°C)</label>
           <div className="ac-field-row">

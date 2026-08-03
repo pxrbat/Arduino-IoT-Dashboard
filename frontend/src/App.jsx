@@ -1,7 +1,7 @@
 // src/App.jsx
 import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
-import socketIOClient from 'socket.io-client';
+import { io } from 'socket.io-client';
 import DashboardLayout from './components/layout/DashboardLayout';
 import DashboardCard from './components/DashboardCard';
 import EnvironmentalChart from './components/EnvironmentalChart';
@@ -20,6 +20,7 @@ const API_END_POINT = 'http://localhost:5000/api/sensor/data';
 const THRESHOLD_ENDPOINT = 'http://localhost:5000/api/sensor/threshold';
 const SOCKET_URL = 'http://localhost:5000';
 const SESSION_STORAGE_KEY = 'iot-dashboard-session';
+const socket = io(SOCKET_URL);
 
 const DEFAULT_THRESHOLDS = {
   tempThreshold: 32,
@@ -109,23 +110,29 @@ export default function App() {
       return undefined;
     }
 
-    const socket = socketIOClient(SOCKET_URL);
-
     socket.on('connect', () => setIsLive(true));
     socket.on('disconnect', () => setIsLive(false));
+
     socket.on('newSensorData', (data) => {
       const reading = Array.isArray(data) ? data[0] : data;
       if (!reading) return;
+
       const newLog = {
         timestamp: reading.timestamp || new Date().toISOString(),
         temperature: reading.temperature,
         humidity: reading.humidity,
       };
+
       setDataLogs((currentLogs) => [newLog, ...currentLogs].slice(0, 40));
       setErrorSyncing(false);
     });
 
-    return () => socket.disconnect();
+    return () => {
+      socket.off('connect');
+      socket.off('disconnect');
+      socket.off('newSensorData');
+    };
+
   }, [session]);
 
   useEffect(() => {
@@ -259,7 +266,7 @@ export default function App() {
       {activeSection === 'users' && session.role === 'admin' && (<ManageUsers session={session} />)}
 
       {activeSection === 'admin' && session.role === 'admin' && (
-        <AdminControls session={session} onRefresh={fetchSensorLogs} onThresholdUpdate={fetchThresholds} />
+        <AdminControls session={session} socket={socket} onRefresh={fetchSensorLogs} onThresholdUpdate={fetchThresholds} />
       )}
 
       {activeSection === 'profile' && (
