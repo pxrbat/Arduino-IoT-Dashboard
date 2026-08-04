@@ -1,4 +1,3 @@
-// src/components/dashboard/EnvironmentalChart.jsx
 import React, { useEffect, useState } from 'react';
 import {
   Chart as ChartJS,
@@ -11,13 +10,11 @@ import {
   Legend,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { Thermometer, Droplets } from 'lucide-react';
+import { Thermometer, Droplets, Wind } from 'lucide-react';
 import './EnvironmentalChart.css';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
-// Reads a CSS custom property off <html> and stays in sync with data-theme changes,
-// since Chart.js options are plain JS and can't reference var() directly.
 function useThemeTokens() {
   const [tokens, setTokens] = useState({
     text: '#171717',
@@ -115,6 +112,29 @@ export default function EnvironmentalChart({ dataLogs }) {
     ],
   };
 
+  const airQualityConfig = {
+    labels,
+    datasets: [
+      {
+        label: 'Air Quality',
+        data: chartData.map((log) => log.airQualityScore),
+      borderColor: '#10b981',
+      backgroundColor: (context) => {
+        const { ctx, chartArea } = context.chart;
+        return makeAreaGradient(ctx, chartArea, '16, 185, 129');
+      },
+      fill: true,
+      tension: 0.4,
+      borderWidth: 2.5,
+      pointRadius: 0,
+      pointHoverRadius: 5,
+      pointHoverBackgroundColor: '#10b981',
+      pointHoverBorderColor: tokens.panelStrong,
+      pointHoverBorderWidth: 2,
+    },
+  ],
+};
+
   const getChartOptions = (unit) => ({
     responsive: true,
     maintainAspectRatio: false,
@@ -159,6 +179,7 @@ export default function EnvironmentalChart({ dataLogs }) {
   const latest = chartData[chartData.length - 1];
   const tempValues = chartData.map((d) => d.temperature);
   const humidityValues = chartData.map((d) => d.humidity);
+  const airQualityValues = chartData.map((d) => d.airQualityScore);
 
   return (
     <div className="ec-container">
@@ -209,6 +230,25 @@ export default function EnvironmentalChart({ dataLogs }) {
           <Line data={humidityConfig} options={getChartOptions('%')} />
         </div>
       </div>
+
+      <div className="ec-panel">
+        <div className="ec-accent-bar ec-accent-air" />
+        <div className="ec-header">
+          <h3><Wind size={14} strokeWidth={2} className="ec-icon ec-icon-air"/>Air Quality</h3>
+            <div className="stats">
+              <span className="stat stat-primary stat-air">{latest ? latest.airQualityScore : '--'}/100</span>
+              <span className="stat">Min {airQualityValues.length ? Math.min(...airQualityValues) : '--'}</span>
+              <span className="stat">Max {airQualityValues.length ? Math.max(...airQualityValues) : '--'}</span>
+        </div>
+      </div>
+
+  <div className="ec-chart-wrapper">
+    <Line
+      data={airQualityConfig}
+      options={getChartOptions('')}
+    />
+  </div>
+</div>
     </div>
   );
 }

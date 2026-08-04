@@ -16,12 +16,17 @@ const char* serverUrl = "http://192.168.18.10:5000/api/sensor/data"; //Put the I
 #define SENSOR_RETRY 3
 #define RELAY_PIN 25
 #define WEBSOCKET_PORT 5000
+#define MQ135_PIN 34
+#define MQ135_WARMUP_TIME 30000
+#define MQ135_SAMPLES 100
 
 WebSocketsClient webSocket;
 DHT dht(DHTPIN, DHTTYPE);
 
 unsigned long lastReadingTime = 0;
 bool wifiConnected = false;
+int mq135Baseline = 0;
+int maxDifference = 1;
 
 void setup() {
     Serial.begin(115200);
@@ -32,15 +37,20 @@ void setup() {
     dht.begin();
     Serial.println("[SYSTEM] DHT22 sensor initialized");
 
+    connectToWiFi();
+    
+    configTime(0, 0, "pool.ntp.org", "time.nist.gov"); 
+    Serial.println("[SYSTEM] NTP time synchronized");
+
+    pinMode(MQ135_PIN, INPUT);
+    calibrateMQ135();
+
     pinMode(RELAY_PIN, OUTPUT);
     digitalWrite(RELAY_PIN, HIGH);
 
     Serial.println("[SYSTEM] Relay initialized");
 
-    connectToWiFi();
     
-    configTime(0, 0, "pool.ntp.org", "time.nist.gov"); 
-    Serial.println("[SYSTEM] NTP time synchronized");
 
     webSocket.begin("192.168.18.10", WEBSOCKET_PORT,"/esp32");
 
@@ -58,12 +68,62 @@ void loop() {
         wifiConnected = true;
         Serial.println("[WIFI] Connection restored");
     }
-    
     unsigned long currentMillis = millis();
     if (currentMillis - lastReadingTime >= READING_INTERVAL) {
         lastReadingTime = currentMillis;
         readAndSendData();
     }
+}
+
+void calibrateMQ135() {
+    Serial.println("[MQ135] Warming up sensor...");
+    for (int i = 0; i < MQ135_WARMUP_TIME / 1000; i++) {
+        Serial.print(".");
+        delay(1000);
+    }
+
+    Serial.println();
+    long total = 0;
+    Serial.println("[MQ135] Calibrating...");
+    for (int i = 0; i < MQ135_SAMPLES; i++) {
+        total += analogRead(MQ135_PIN);
+        delay(50);
+    }
+    mq135Baseline = total / MQ135_SAMPLES;
+    maxDifference = 1;
+    Serial.print("[MQ135] Baseline: ");
+    Serial.println(mq135Baseline);
+    Serial.println("[MQ135] Calibration complete.");
+}
+
+int getAirQualityScore(int currentReading) {
+
+    int difference = mq135Baseline - currentReading;
+
+    if (difference < 0)
+        difference = 0;
+
+    // Learn the largest drop we've seen
+    if (difference > maxDifference)
+        maxDifference = difference;
+
+    int score = map(difference, 0, maxDifference, 100, 0);
+
+    score = constrain(score, 0, 100);
+
+    return score;
+}
+
+String getAirQualityStatus(int score) {
+    if (score >= 90)
+        return "Excellent";
+    if (score >= 70)
+        return "Good";
+    if (score >= 50)
+        return "Moderate";
+    if (score >= 30)
+        return "Poor";
+    return "Very Poor";
 }
 
 void pressRelay(){
@@ -167,20 +227,48 @@ void readAndSendData() {
         Serial.println("[SENSOR] Failed to read after multiple attempts");
         return;
     }
+
+    int mqReading = analogRead(MQ135_PIN);
+    int difference = mq135Baseline - mqReading;
+
+    if (difference < 0) difference = 0;
+    int airQualityScore = getAirQualityScore(mqReading);
+    String airQualityStatus = getAirQualityStatus(airQualityScore);
     
     Serial.println("--- Sensor Reading ---");
+
     Serial.print("Temperature: ");
     Serial.print(temperature);
     Serial.println(" C");
+
     Serial.print("Humidity: ");
     Serial.print(humidity);
     Serial.println(" %");
+
+    Serial.print("Baseline: ");
+    Serial.println(mq135Baseline);
+
+    Serial.print("MQ135 ADC: ");
+    Serial.println(mqReading);
+
+    Serial.print("Difference: ");
+    Serial.println(difference);
+
+    Serial.print("Max Difference: ");
+    Serial.println(maxDifference);
+
+    Serial.print("Air Quality Score: ");
+    Serial.println(airQualityScore);
+
+    Serial.print("Air Quality: ");
+    Serial.println(airQualityStatus);
+
     Serial.println("----------------------");
     
-    sendToBackend(temperature, humidity);
+    sendToBackend(temperature, humidity, mqReading, airQualityScore, airQualityStatus);
 }
 
-void sendToBackend(float temperature, float humidity) {
+void sendToBackend(float temperature, float humidity, int mqReading, int airQualityScore, String airQualityStatus) {
     if (WiFi.status() != WL_CONNECTED) {
         Serial.println("[HTTP] No WiFi connection. Data not sent.");
         return;
@@ -190,10 +278,18 @@ void sendToBackend(float temperature, float humidity) {
     http.begin(serverUrl);
     http.addHeader("Content-Type", "application/json");
     
-    char jsonPayload[128];
-    snprintf(jsonPayload, sizeof(jsonPayload), 
-             "{\"temperature\":%.2f,\"humidity\":%.2f}", 
-             temperature, humidity);
+    char jsonPayload[256];
+
+    snprintf(
+        jsonPayload,
+        sizeof(jsonPayload),
+        "{\"temperature\":%.2f,\"humidity\":%.2f,\"mq135\":%d,\"airQualityScore\":%d,\"airQualityStatus\":\"%s\"}",
+        temperature,
+        humidity,
+        mqReading,
+        airQualityScore,
+        airQualityStatus.c_str()
+    );
     
     Serial.print("[HTTP] Sending: ");
     Serial.println(jsonPayload);

@@ -4,10 +4,10 @@ const ThresholdConfig = require("../models/ThresholdConfig");
 const { getIO } = require("../socket.js");
 
 const addSensorData = async (req, res) => {
-    const { temperature, humidity } = req.body;
-    if (temperature === undefined || humidity === undefined) {
+    const { temperature, humidity, mq135, airQualityScore, airQualityStatus } = req.body;
+    if (temperature === undefined || humidity === undefined || mq135 === undefined || airQualityScore === undefined || airQualityStatus === undefined) {
         return res.status(400).json({
-            message: "Temperature and Humidity are required fields.",
+            message: "All fields are required.",
         });
     }
 
@@ -24,7 +24,7 @@ const addSensorData = async (req, res) => {
     }
 
     try {
-        const data = await SensorData.create({ temperature, humidity });
+        const data = await SensorData.create({ temperature, humidity, mq135, airQualityScore, airQualityStatus });
         emitSensorData();
         res.status(201).json(data);
     } catch (error) {
@@ -71,6 +71,9 @@ const emitSensorData = async (req, res) => {
         const Data = data.map((log) => ({
             temperature: log.temperature,
             humidity: log.humidity,
+            mq135: log.mq135,
+            airQualityScore: log.airQualityScore,
+            airQualityStatus: log.airQualityStatus,
             timestamp: log.createdAt,
         }));
 

@@ -1,5 +1,6 @@
 // src/App.jsx
 import { useCallback, useEffect, useState } from 'react';
+import { Wind } from 'lucide-react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import DashboardLayout from './components/layout/DashboardLayout';
@@ -77,6 +78,9 @@ export default function App() {
               timestamp: log.createdAt,
               temperature: log.temperature,
               humidity: log.humidity,
+              mq135: log.mq135,
+              airQualityScore: log.airQualityScore,
+              airQualityStatus: log.airQualityStatus,
             }))
           : []
       );
@@ -121,6 +125,9 @@ export default function App() {
         timestamp: reading.timestamp || new Date().toISOString(),
         temperature: reading.temperature,
         humidity: reading.humidity,
+        mq135: reading.mq135,
+        airQualityScore: reading.airQualityScore,
+        airQualityStatus: reading.airQualityStatus,
       };
 
       setDataLogs((currentLogs) => [newLog, ...currentLogs].slice(0, 40));
@@ -203,7 +210,7 @@ export default function App() {
   });
 };
 
-  const newestLog = dataLogs[0] || { temperature: 0, humidity: 0 };
+  const newestLog = dataLogs[0] || { temperature: 0, humidity: 0, mq135: 0, airQualityScore: 100, airQualityStatus: "Excellent" };
 
   const warnings = {
     tempHigh: newestLog.temperature > thresholds.tempThreshold,
@@ -247,6 +254,19 @@ export default function App() {
           <div className="dl-cards-grid">
             <DashboardCard title="Temperature" value={newestLog.temperature} unit="°C" isTemp={true} highThreshold={thresholds.tempThreshold} />
             <DashboardCard title="Relative Humidity" value={newestLog.humidity} unit="%" isTemp={false} lowThreshold={thresholds.humidityThreshold} highThreshold={thresholds.humidityThresholdHigh} />
+            <div className="dc-card">
+              <div className={`dc-icon is-air`}>
+                <Wind size={16} strokeWidth={1.75} />
+              </div>
+              <div className="dc-body">
+                  <p className="dc-title">Air Quality</p>
+                    <div className="dc-value-row">
+                        <span className="dc-value">{newestLog.airQualityScore}</span>
+                        <span className="dc-unit">/100</span>
+                    </div>
+                    <span className={`dc-status ${newestLog.airQualityStatus === "Excellent" ? "is-excellent": newestLog.airQualityStatus === "Good"? "is-good" : newestLog.airQualityStatus === "Moderate" ? "is-moderate" : newestLog.airQualityStatus === "Poor" ? "is-poor" : "is-very-poor"}`}>{newestLog.airQualityStatus}</span>
+              </div>
+            </div>
           </div>
           <EnvironmentalChart dataLogs={dataLogs} />
         </>
