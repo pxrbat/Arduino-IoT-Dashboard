@@ -28,7 +28,7 @@ export default function WarningBanner({ warnings = {}, currentValues = {}, thres
 
     if (warnings.tempHigh && !prev.tempHigh) {
       new Notification(' High Temperature Alert', {
-        body: `Temperature is ${currentValues.temperature}°C — exceeds ${thresholds.tempThreshold}°C limit. Fan activated.`,
+        body: `Temperature is ${currentValues.temperature}°C — exceeds ${thresholds.tempThreshold}°C limit. Please activate fan if available.`,
         tag: 'temp-warning',
       });
     }
@@ -72,7 +72,7 @@ export default function WarningBanner({ warnings = {}, currentValues = {}, thres
       icon: Thermometer,
       severity: 'critical',
       title: 'HIGH TEMPERATURE',
-      detail: `${currentValues.temperature}°C exceeds ${thresholds.tempThreshold}°C — Fan Activated`,
+      detail: `${currentValues.temperature}°C exceeds ${thresholds.tempThreshold}°C — Please activate fan if available.`,
     });
   }
 
