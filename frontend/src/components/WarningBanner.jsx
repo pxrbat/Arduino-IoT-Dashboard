@@ -35,7 +35,7 @@ export default function WarningBanner({ warnings = {}, currentValues = {}, thres
 
     if (warnings.humidityLow && !prev.humidityLow) {
       new Notification('Low Humidity Alert', {
-        body: `Humidity is ${currentValues.humidity}% — below ${thresholds.humidityThreshold}% limit. Mist maker activated.`,
+        body: `Humidity is ${currentValues.humidity}% — below ${thresholds.humidityThreshold}% limit. Please activate the mist maker.`,
         tag: 'humidity-warning',
       });
     }
