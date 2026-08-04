@@ -82,7 +82,7 @@ export default function WarningBanner({ warnings = {}, currentValues = {}, thres
       icon: Droplets,
       severity: 'warning',
       title: 'LOW HUMIDITY',
-      detail: `${currentValues.humidity}% is below ${thresholds.humidityThreshold}% — Mist Maker Activated`,
+      detail: `${currentValues.humidity}% is below ${thresholds.humidityThreshold}% — Please activate the mist maker`,
     });
   }
 
